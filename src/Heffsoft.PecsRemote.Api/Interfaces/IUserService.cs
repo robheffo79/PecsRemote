@@ -1,0 +1,15 @@
+﻿using Heffsoft.PecsRemote.Api.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Heffsoft.PecsRemote.Api.Interfaces
+{
+    public interface IUserService
+    {
+        User GetUser(String username);
+        Boolean AuthenticateUser(String username, String password);
+        void CreateUser(String username, String password, IEnumerable<String> roles);
+    }
+}
