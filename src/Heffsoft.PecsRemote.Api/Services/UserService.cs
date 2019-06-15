@@ -9,7 +9,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class UserService : IUserService
     {
-        public Boolean AuthenticateUser(String username, String password)
+        public String AuthenticateUser(String username, String password)
         {
             throw new NotImplementedException();
         }

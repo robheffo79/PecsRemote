@@ -9,7 +9,7 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
     public interface IUserService
     {
         User GetUser(String username);
-        Boolean AuthenticateUser(String username, String password);
+        String AuthenticateUser(String username, String password);
         void CreateUser(String username, String password, IEnumerable<String> roles);
     }
 }
