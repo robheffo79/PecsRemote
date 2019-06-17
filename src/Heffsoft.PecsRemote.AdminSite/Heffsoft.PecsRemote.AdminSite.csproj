@@ -5,19 +5,17 @@
     <ProjectGuid>{7A23D203-DDD7-49C2-83F7-2C60FC8CA206}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="Content\bootstrap.css" />
-    <Content Include="Content\scrolling-nav.css" />
-    <Content Include="Content\Site.css" />
-    <Content Include="favicon.ico" />
-    <Content Include="fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="Scripts\scrolling-nav.js" />
-    <Content Include="index.html" />
-    <Content Include="Scripts\bootstrap.js" />
-    <Content Include="Scripts\jquery-3.3.1.js" />
-    <Content Include="Scripts\vue-2.6.10.js" />
+    <Content Include="babel.config.js" />
+    <Content Include="public\favicon.ico" />
+    <Content Include="public\index.html" />
+    <Content Include="src\assets\logo.png" />
+    <Content Include="src\main.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="package-lock.json" />
+    <None Include="package.json" />
+    <None Include="README.md" />
+    <None Include="src\App.vue" />
+    <None Include="src\components\HelloWorld.vue" />
   </ItemGroup>
 </Project>
