@@ -5,17 +5,36 @@
     <ProjectGuid>{7A23D203-DDD7-49C2-83F7-2C60FC8CA206}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="babel.config.js" />
-    <Content Include="public\favicon.ico" />
-    <Content Include="public\index.html" />
-    <Content Include="src\assets\logo.png" />
-    <Content Include="src\main.js" />
+    <Content Include="components\login.html" />
+    <Content Include="css\bootstrap-4.3.1.min.css" />
+    <Content Include="css\fontawesome-5.9.0.min.css" />
+    <Content Include="css\global.css" />
+    <Content Include="favicon.png" />
+    <Content Include="images\logo.png" />
+    <Content Include="index.html" />
+    <Content Include="scripts\adminapp.js" />
+    <Content Include="scripts\bootstrap-4.3.1.min.js" />
+    <Content Include="scripts\handlebars-4.1.2.min.js" />
+    <Content Include="scripts\jquery-3.4.1.min.js" />
+    <Content Include="scripts\popper.min.js" />
+    <Content Include="scripts\tooltip.min.js" />
+    <Content Include="webfonts\fa-brands-400.svg" />
+    <Content Include="webfonts\fa-regular-400.svg" />
+    <Content Include="webfonts\fa-solid-900.svg" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <None Include="package-lock.json" />
-    <None Include="package.json" />
-    <None Include="README.md" />
-    <None Include="src\App.vue" />
-    <None Include="src\components\HelloWorld.vue" />
+    <None Include="webfonts\fa-brands-400.eot" />
+    <None Include="webfonts\fa-brands-400.ttf" />
+    <None Include="webfonts\fa-brands-400.woff" />
+    <None Include="webfonts\fa-brands-400.woff2" />
+    <None Include="webfonts\fa-regular-400.eot" />
+    <None Include="webfonts\fa-regular-400.ttf" />
+    <None Include="webfonts\fa-regular-400.woff" />
+    <None Include="webfonts\fa-regular-400.woff2" />
+    <None Include="webfonts\fa-solid-900.eot" />
+    <None Include="webfonts\fa-solid-900.ttf" />
+    <None Include="webfonts\fa-solid-900.woff" />
+    <None Include="webfonts\fa-solid-900.woff2" />
   </ItemGroup>
 </Project>
