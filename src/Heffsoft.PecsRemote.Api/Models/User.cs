@@ -13,6 +13,5 @@ namespace Heffsoft.PecsRemote.Api.Models
         public String Username { get; set; }
         public String HashedPassword { get; set; }
         public String Salt { get; set; }
-        public String Roles { get; set; }
     }
 }
