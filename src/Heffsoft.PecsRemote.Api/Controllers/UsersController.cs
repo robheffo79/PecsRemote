@@ -26,7 +26,7 @@ namespace Heffsoft.PecsRemote.Api.Controllers
             if (String.IsNullOrWhiteSpace(token))
                 return Unauthorized();
 
-            return Ok(token);
+            return Ok(new { token });
         }
     }
 }
