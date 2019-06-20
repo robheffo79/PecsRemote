@@ -34,7 +34,9 @@
 
         var token = window.sessionStorage.getItem('token');
         if (token === null) {
-            login();
+            adminApp.login();
+        } else {
+            adminApp.main();
         }
 
         adminApp.popLoader();
@@ -64,9 +66,12 @@
                     dataType: 'json'
                 }).done(function (response) {
                     window.sessionStorage.setItem('token', response.token);
-                    if (loginOldContent !== null) {
+                    if (loginOldContent !== null && loginOldContent.length > 0) {
                         $('.main-container').empty().append(loginOldContent);
                         loginOldContent = null;
+                    } else {
+                        loginOldContent = null;
+                        adminApp.main();
                     }
                 }).fail(function (response) {
                     var message = "An error has occurred.";
@@ -91,9 +96,52 @@
             });
             adminApp.popLoader();
         });
+    },
+
+    main() {
+        adminApp.pushLoader();
+        $('.main-container').empty()
+
+        // Load Header
+        $.when(
+            $.ajax({ url: 'components/header.html', crossDomain: true }),
+            $.ajax({ url: 'components/main.html', crossDomain: true }),
+            $.ajax({ url: 'components/footer.html', crossDomain: true })
+        ).done(function (header, main, footer) {
+            $('.main-container').append(header[0]).append(main[0]).append(footer[0]);
+            $('#btnTitle').on('click', function () { adminApp.home(); });
+            $('#btnHome').on('click', function () { adminApp.home(); });
+            $('#btnPlaylists').on('click', function () { adminApp.playlists(); });
+            $('#btnSetup').on('click', function () { adminApp.setup(); });
+            $('#btnHistory').on('click', function () { adminApp.history(); });
+            $('#btnLogout').on('click', function () { adminApp.logout(); });
+        });
+
+        adminApp.popLoader();
+    },
+
+    home() {
+        alert('Not Implemented.');
+    },
+
+    playlists() {
+        alert('Not Implemented.');
+    },
+
+    setup() {
+        alert('Not Implemented.');
+    },
+
+    history() {
+        alert('Not Implemented.');
+    },
+
+    logout() {
+        window.sessionStorage.removeItem('token');
+        adminApp.login();
     }
 };
 
 $(document).ready(function () {
-    adminApp.login();
+    adminApp.init();
 });
