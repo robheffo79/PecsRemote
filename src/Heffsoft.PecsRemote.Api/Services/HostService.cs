@@ -1,4 +1,5 @@
 ﻿using Heffsoft.PecsRemote.Api.Interfaces;
+using Heffsoft.PecsRemote.Api.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -15,10 +16,10 @@ namespace Heffsoft.PecsRemote.Api.Services
     {
         private const String HOSTNAME_FILE = "/etc/hostname";
         private const String DEV_FOLDER = "/dev";
+        private const String SYSGRAPHICS_FOLDER = "/sys/class/graphics";
+        private const String VIRTUAL_SIZE_NODE = "virtual_size";
+        private const String BPP_NODE = "bits_per_pixel";
         private const String FRAMEBUFFER_NODES = "fb";
-        private const Int32 TFT_WIDTH = 320;
-        private const Int32 TFT_HEIGHT = 240;
-        private const PixelFormat TFT_PIXELFORMAT = PixelFormat.Format16bppRgb565;
 
         public String Hostname => File.ReadAllText(HOSTNAME_FILE);
 
@@ -56,13 +57,55 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public void SetImage(Int32 displayId, Bitmap image)
         {
-            Byte[] pixelData = GetBitmapBytes(TFT_WIDTH, TFT_HEIGHT, TFT_PIXELFORMAT, image);
-            String fbNode = Path.Combine(DEV_FOLDER, $"{FRAMEBUFFER_NODES}{displayId}");
+            FramebufferInfo info = GetFramebufferInfo(displayId);
 
-            File.WriteAllBytes(fbNode, pixelData);
+            Byte[] pixelData = GetBitmapBytes(info.Width, info.Height, info.PixelFormat, image);
+
+            File.WriteAllBytes(info.DevNode, pixelData);
         }
 
-        private Byte[] GetBitmapBytes(Int32 width, Int32 height, PixelFormat pixelFormat, Bitmap image)
+        private FramebufferInfo GetFramebufferInfo(Int32 displayId)
+        {
+            String sysFolder = Path.Combine(SYSGRAPHICS_FOLDER, $"{FRAMEBUFFER_NODES}{displayId}");
+            String sizeFile = Path.Combine(sysFolder, VIRTUAL_SIZE_NODE);
+            String bppFile = Path.Combine(sysFolder, BPP_NODE);
+            String size = File.ReadAllText(sizeFile);
+            String bpp = File.ReadAllText(bppFile);
+
+            FramebufferInfo info = new FramebufferInfo()
+            {
+                DisplayId = displayId,
+                DevNode = Path.Combine(DEV_FOLDER, $"{FRAMEBUFFER_NODES}{displayId}"),
+                Width = Int32.Parse(size.Split(',').First()),
+                Height = Int32.Parse(size.Split(',').Last()),
+                PixelFormat = TranslatePixelFormat(Int32.Parse(bpp))
+            };
+
+            return info;
+        }
+
+        private static PixelFormat TranslatePixelFormat(Int32 bpp)
+        {
+            switch(bpp)
+            {
+                case 15:
+                    return PixelFormat.Format16bppRgb555;
+
+                case 16:
+                    return PixelFormat.Format16bppRgb565;
+
+                case 24:
+                    return PixelFormat.Format24bppRgb;
+
+                case 32:
+                    return PixelFormat.Format32bppRgb;
+
+                default:
+                    return PixelFormat.Undefined;
+            }
+        }
+
+        private static Byte[] GetBitmapBytes(Int32 width, Int32 height, PixelFormat pixelFormat, Bitmap image)
         {
             Bitmap dest = new Bitmap(width, height, pixelFormat);
             dest.SetResolution(image.HorizontalResolution, image.VerticalResolution);
