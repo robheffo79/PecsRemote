@@ -16,6 +16,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class HostService : IHostService
     {
+        private const String REBOOT_CMD = "reboot";
         private const String WIFI_SCAN_CMD = "iwlist wlan0 scan";
         private const String HOSTNAME_FILE = "/etc/hostname";
         private const String HOSTS_FILE = "/etc/hosts";
@@ -187,6 +188,11 @@ namespace Heffsoft.PecsRemote.Api.Services
             process.Dispose();
 
             return output;
+        }
+
+        public void Reboot()
+        {
+            RunBash(REBOOT_CMD);
         }
     }
 }

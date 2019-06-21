@@ -21,5 +21,7 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
         void ConfigureIPSettings(String ipv4, String subnet, String gateway, String primaryDns, String secondaryDns);
 
         void SetImage(Int32 displayId, Bitmap image);
+
+        void Reboot();
     }
 }
