@@ -2,19 +2,23 @@
 using Heffsoft.PecsRemote.Api.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
     public class HostService : IHostService
     {
+        private const String WIFI_SCAN_CMD = "iwlist wlan0 scan";
         private const String HOSTNAME_FILE = "/etc/hostname";
+        private const String HOSTS_FILE = "/etc/hosts";
         private const String DEV_FOLDER = "/dev";
         private const String SYSGRAPHICS_FOLDER = "/sys/class/graphics";
         private const String VIRTUAL_SIZE_NODE = "virtual_size";
@@ -47,12 +51,32 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public IEnumerable<String> ScanForWiFi()
         {
-            throw new NotImplementedException();
+            Regex ssid = new Regex("ESSID:\"(?<ssid>[\\s\\S]{1,32})\"");
+
+            String scanOutput = RunBash(WIFI_SCAN_CMD);
+
+            foreach (String line in scanOutput.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
+            {
+                Match match = ssid.Match(line);
+                if(match.Success)
+                {
+                    yield return match.Groups["ssid"].Value;
+                }
+            }
         }
 
         public void SetHostname(String hostname)
         {
-            throw new NotImplementedException();
+            String oldHostname = File.ReadAllText(HOSTNAME_FILE).Trim();
+            String newHostname = hostname.Trim().ToLower();
+
+            // Update Hostname
+            File.WriteAllText(HOSTNAME_FILE, newHostname);
+
+            // Update Hosts
+            String hostsFile = File.ReadAllText(HOSTS_FILE);
+            hostsFile = hostsFile.Replace(oldHostname, newHostname);
+            File.WriteAllText(HOSTS_FILE, hostsFile);
         }
 
         public void SetImage(Int32 displayId, Bitmap image)
@@ -138,6 +162,31 @@ namespace Heffsoft.PecsRemote.Api.Services
             dest.UnlockBits(bitmapData);
 
             return pixelData;
+        }
+
+        private static String RunBash(String cmd)
+        {
+            String escaped = cmd.Replace("\"", "\\\"");
+            Process process = new Process()
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \"{escaped}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+
+            process.Start();
+
+            String output = process.StandardOutput.ReadToEnd();
+
+            process.WaitForExit();
+            process.Dispose();
+
+            return output;
         }
     }
 }
