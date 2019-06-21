@@ -342,3 +342,5 @@ yarn-error.log
 *.njsproj
 *.sln
 
+appsettings.json
+
