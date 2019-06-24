@@ -11,3 +11,52 @@ SELECT * FROM (SELECT 'Admin', 'bf8d188e28d76e55e642402b27494bd0a50cc581c0b2bceb
 WHERE NOT EXISTS (
 	SELECT `Id` FROM `Users` WHERE `Username` = 'Admin' AND `Id` = 1
 ) LIMIT 1;
+
+CREATE TABLE IF NOT EXISTS `Settings` (
+	`Id` INT NOT NULL AUTO_INCREMENT,
+	`Key` VARCHAR(64) NOT NULL,
+	`Value` VARCHAR(MAX) NOT NULL,
+	PRIMARY_KEY (`Id`)
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS `Playlists` (
+	`Id` INT NOT NULL AUTO_INCREMENT,
+	`Name` VARCHAR(64) NOT NULL,
+	`Image` CHAR(36) NOT NULL,
+	`Enabled` BIT NOT NULL,
+	`PlaybackMode` INT NOT NULL,
+	`Created` DATETIME NOT NULL,
+	`CreatedByUserId` INT NOT NULL,
+	`LastUpdated` DATETIME NOT NULL,
+	`LastUpdatedByUserId` INT NOT NULL,
+	PRIMARY_KEY(`Id`)
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS `Media` (
+	`Id` INT NOT NULL AUTO_INCREMENT,
+	`Name` VARCHAR(64) NOT NULL,
+	`Image` CHAR(36) NOT NULL,
+	`Url` VARCHAR(2083) NOT NULL,
+	`Enabled` BIT NOT NULL,
+	`Created` DATETIME NOT NULL,
+	`CreatedByUserId` INT NOT NULL,
+	`LastUpdated` DATETIME NOT NULL,
+	`LastUpdatedByUserId` INT NOT NULL,
+	PRIMARY_KEY(`Id`)
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS `PlaylistEntries` (
+    `PlaylistId` INT NOT NULL,
+	`MediaId` INT NOT NULL,
+	`Enabled` BIT NOT NULL,
+	`Order` INT NOT NULL,
+	`Added` DATETIME NOT NULL,
+	`AddedByUserId` INT NOT NULL,
+	PRIMARY_KEY(`PlaylistId`, `MediaId`)
+) ENGINE=INNODB;
+
+SET @x := (SELECT COUNT(*) FROM `information_schema`.`statistics` WHERE `table_name` = 'table' AND `index_name` = 'IX_Table_XYZ' AND `table_schema` = DATABASE());
+SET @sql := IF( @x > 0, 'SELECT ''Index Exists.''', 'ALTER TABLE `PlaylistEntries` ADD INDEX `IX_PlaylistEntries_PlaylistId` (`PlaylistId`);');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+

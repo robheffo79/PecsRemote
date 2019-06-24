@@ -52,5 +52,13 @@ namespace Heffsoft.PecsRemote.Api.Services
                 return BitConverter.ToString(hash).Replace("-", String.Empty).ToLowerInvariant();
             }
         }
+
+        public static String GetLast(this String text, Int32 tailLength)
+        {
+            if (tailLength > text.Length)
+                return text;
+
+            return text.Substring(text.Length - tailLength);
+        }
     }
 }

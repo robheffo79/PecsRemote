@@ -9,11 +9,14 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
     interface IHostService
     {
         String Hostname { get; }
+        String Serial { get; }
+        String Mac { get; }
         Int32 ConnectedDisplays { get; }
 
         IEnumerable<String> ScanForWiFi();
 
         void SetHostname(String hostname);
+        void ConfigureAdHoc();
         void ConnectToWiFi(String ssid, String key);
         void ConnectToWiFi(String ssid, String username, String password);
 

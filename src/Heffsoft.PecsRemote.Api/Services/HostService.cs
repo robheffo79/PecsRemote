@@ -9,6 +9,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -18,7 +19,10 @@ namespace Heffsoft.PecsRemote.Api.Services
     {
         private const String REBOOT_CMD = "reboot";
         private const String WIFI_SCAN_CMD = "iwlist wlan0 scan";
+        private const String INTERFACES_FILE = "/etc/network/interfaces";
         private const String HOSTNAME_FILE = "/etc/hostname";
+        private const String CPUINFO_FILE = "/proc/cpuinfo";
+        private const String MAC_FILE = "/sys/class/net/wlan0/address";
         private const String HOSTS_FILE = "/etc/hosts";
         private const String DEV_FOLDER = "/dev";
         private const String SYSGRAPHICS_FOLDER = "/sys/class/graphics";
@@ -29,6 +33,25 @@ namespace Heffsoft.PecsRemote.Api.Services
         public String Hostname => File.ReadAllText(HOSTNAME_FILE);
 
         public Int32 ConnectedDisplays => Directory.EnumerateFiles(DEV_FOLDER, FRAMEBUFFER_NODES + "*").Count();
+
+        public String Serial
+        {
+            get
+            {
+                String cpuInfo = File.ReadAllText(CPUINFO_FILE);
+                foreach(String line in cpuInfo.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
+                {
+                    if(line.StartsWith("Serial"))
+                    {
+                        return line.Split(';').Last().Trim();
+                    }
+                }
+
+                return "0000000000000000";
+            }
+        }
+
+        public String Mac => File.ReadAllText(MAC_FILE);
 
         public void ConfigureIPSettings()
         {
@@ -141,7 +164,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                 gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 gfx.SmoothingMode = SmoothingMode.HighQuality;
 
-                gfx.FillRectangle(Brushes.Black, 0, 0, 320, 240);
+                gfx.FillRectangle(Brushes.Black, 0, 0, width, height);
 
                 Single scaleX = (Single)image.Width / width;
                 Single scaleY = (Single)image.Height / height;
@@ -193,6 +216,22 @@ namespace Heffsoft.PecsRemote.Api.Services
         public void Reboot()
         {
             RunBash(REBOOT_CMD);
+        }
+
+        public void ConfigureAdHoc()
+        {
+            SetHostname("pecsremote");
+
+            String suffix = Mac.Replace(":", "").GetLast(4);
+            String ssid = $"{Hostname}_{suffix}";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append($"# interfaces(5) file used by ifup(8) and ifdown(8)\n\n# Please note that this file is written to be used with dhcpcd\n");
+            sb.Append($"# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'\n\n# Include files from /etc/network/interfaces.d:\n");
+            sb.Append($"source-directory /etc/network/interfaces.d\n\nauto lo\niface lo inet loopback\n\niface eth0 inet dhcp\n\n");
+            sb.Append($"auto wlan0\niface wlan0 inet static\n  address 192.168.1.254\n  netmask 255.255.255.0\n  wireless-channel 6\n");
+            sb.Append($"  wireless-essid {ssid}\nwireless-mode ad-hoc\n");
+            File.WriteAllText(INTERFACES_FILE, sb.ToString());
         }
     }
 }
