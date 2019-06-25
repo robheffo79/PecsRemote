@@ -19,12 +19,17 @@ namespace Heffsoft.PecsRemote.Api.Services
         private readonly IDataContext dataContext;
         private readonly IConfiguration configuration;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IRandomService randomService;
+        private readonly IDataRepository<User> userRepo;
 
-        public UserService(IDataContext dataContext, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public UserService(IDataContext dataContext, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IRandomService randomService)
         {
             this.dataContext = dataContext;
             this.configuration = configuration;
             this.httpContextAccessor = httpContextAccessor;
+            this.randomService = randomService;
+
+            this.userRepo = this.dataContext.GetRepository<User>();
         }
 
         private static User currentUser = null;
@@ -63,8 +68,19 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public String AuthenticateUser(String username, String password)
         {
-            IDataRepository<User> repo = dataContext.GetRepository<User>();
-            User user = repo.Find("`Username` = @Username", new { Username = username }).SingleOrDefault();
+            if (username == null)
+                throw new ArgumentNullException(nameof(username));
+
+            if (String.IsNullOrWhiteSpace(username))
+                throw new ArgumentException($"{nameof(username)} is empty.");
+
+            if (password == null)
+                throw new ArgumentNullException(nameof(password));
+
+            if (String.IsNullOrWhiteSpace(password))
+                throw new ArgumentException($"{nameof(password)} is empty.");
+
+            User user = userRepo.Find("`Username` = @Username", new { Username = username }).SingleOrDefault();
             if (user == null)
                 return null;
 
@@ -89,14 +105,46 @@ namespace Heffsoft.PecsRemote.Api.Services
             return tokenHandler.WriteToken(token);
         }
 
-        public void CreateUser(String username, String password, IEnumerable<String> roles)
+        public void CreateUser(String username, String password)
         {
-            throw new NotImplementedException();
+            if (username == null)
+                throw new ArgumentNullException(nameof(username));
+
+            if (String.IsNullOrWhiteSpace(username))
+                throw new ArgumentException($"{nameof(username)} is empty.");
+
+            if (password == null)
+                throw new ArgumentNullException(nameof(password));
+
+            if (String.IsNullOrWhiteSpace(password))
+                throw new ArgumentException($"{nameof(password)} is empty.");
+
+            User existing = GetUser(username);
+            if (existing != null)
+                throw new InvalidOperationException($"{nameof(username)} is already in use.");
+
+            String salt = randomService.NextSalt(64);
+            String hashedPassword = password.Hash(salt);
+
+            User user = new User()
+            {
+                Username = username,
+                Salt = salt,
+                HashedPassword = hashedPassword
+            };
+
+            user.Id = userRepo.Insert(user);
         }
 
         public User GetUser(String username)
         {
-            throw new NotImplementedException();
+            if (username == null)
+                throw new ArgumentNullException(nameof(username));
+
+            if (String.IsNullOrWhiteSpace(username))
+                throw new ArgumentException($"{nameof(username)} is empty.");
+
+            return userRepo.Find("`Username` == @Username", new { Username = username }).SingleOrDefault();
         }
     }
 }

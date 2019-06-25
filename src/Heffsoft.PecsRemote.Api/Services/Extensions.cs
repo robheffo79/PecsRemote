@@ -16,7 +16,10 @@ namespace Heffsoft.PecsRemote.Api.Services
     {
         public static IServiceCollection AddApiServices(this IServiceCollection services)
         {
-            return services.AddTransient<IUserService, UserService>();
+            return services.AddTransient<IRandomService, RandomService>()
+                           .AddTransient<IUserService, UserService>()
+                           .AddTransient<IHostService, HostService>()
+                           .AddTransient<IMediaService, MediaService>();
         }
 
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

@@ -12,6 +12,6 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
 
         User GetUser(String username);
         String AuthenticateUser(String username, String password);
-        void CreateUser(String username, String password, IEnumerable<String> roles);
+        void CreateUser(String username, String password);
     }
 }
