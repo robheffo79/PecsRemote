@@ -19,6 +19,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private Sender sender;
         private IMediaChannel mediaChannel;
+        private MediaStatus mediaStatus;
 
         public CastService()
         {
@@ -36,7 +37,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
         }
 
-        public IEnumerable<CastTarget> GetCastReceivers()
+        public Task<IEnumerable<CastTarget>> GetCastReceivers()
         {
             IEnumerable<IReceiver> receivers;
 
@@ -45,10 +46,10 @@ namespace Heffsoft.PecsRemote.Api.Services
                 receivers = seenReceivers.Values.ToArray();
             }
 
-            return receivers.Select(r => new CastTarget() { Id = r.Id, Name = r.FriendlyName, Address = r.IPEndPoint.Address });
+            return Task.FromResult(receivers.Select(r => new CastTarget() { Id = r.Id, Name = r.FriendlyName, Address = r.IPEndPoint.Address }));
         }
 
-        public Boolean ConnectToCastReceiver(String id)
+        public async Task<Boolean> ConnectToCastReceiver(String id)
         {
             if (id == null)
                 throw new ArgumentNullException(nameof(id));
@@ -63,10 +64,10 @@ namespace Heffsoft.PecsRemote.Api.Services
             {
                 IReceiver receiver = seenReceivers[id];
                 sender = new Sender();
-                sender.ConnectAsync(receiver).Wait();
+                await sender.ConnectAsync(receiver);
 
                 mediaChannel = sender.GetChannel<IMediaChannel>();
-                sender.LaunchAsync(mediaChannel).Wait();
+                await sender.LaunchAsync(mediaChannel);
 
                 return true;
             }
@@ -76,11 +77,11 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
         }
 
-        public void DisconnectCastReceiver()
+        public async Task DisconnectCastReceiver()
         {
             if (sender != null)
             {
-                mediaChannel.StopAsync().Wait();
+                await mediaChannel.StopAsync();
                 mediaChannel = null;
 
                 sender.Disconnect();
@@ -88,19 +89,19 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
         }
 
-        public void CastMedia(Uri url)
+        public async Task CastMedia(Uri url)
         {
-            var mediaStatus = mediaChannel.LoadAsync(new MediaInformation()
+            mediaStatus = await mediaChannel.LoadAsync(new MediaInformation()
             {
                 ContentId = url.ToString()
-            }).Result;
+            });
         }
 
-        public void StopMedia()
+        public async Task StopMedia()
         {
             if(sender != null && mediaChannel != null)
             {
-                mediaChannel.StopAsync().Wait();
+                await mediaChannel.StopAsync();
             }
         }
     }
