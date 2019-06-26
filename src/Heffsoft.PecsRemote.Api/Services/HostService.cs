@@ -56,22 +56,22 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public String Mac => File.ReadAllText(MAC_FILE);
 
-        public void ConfigureIPSettings()
+        public Task ConfigureIPSettings()
         {
             throw new NotImplementedException();
         }
 
-        public void ConfigureIPSettings(String ipv4, String subnet, String gateway, String primaryDns, String secondaryDns)
+        public Task ConfigureIPSettings(String ipv4, String subnet, String gateway, String primaryDns, String secondaryDns)
         {
             throw new NotImplementedException();
         }
 
-        public void ConnectToWiFi(String ssid, String key)
+        public Task ConnectToWiFi(String ssid, String key)
         {
             throw new NotImplementedException();
         }
 
-        public void ConnectToWiFi(String ssid, String username, String password)
+        public Task ConnectToWiFi(String ssid, String username, String password)
         {
             throw new NotImplementedException();
         }
@@ -96,18 +96,18 @@ namespace Heffsoft.PecsRemote.Api.Services
             return ssidList;
         }
 
-        public void SetHostname(String hostname)
+        public async Task SetHostname(String hostname)
         {
             String oldHostname = File.ReadAllText(HOSTNAME_FILE).Trim();
             String newHostname = hostname.Trim().ToLower();
 
             // Update Hostname
-            File.WriteAllText(HOSTNAME_FILE, newHostname);
+            await File.WriteAllTextAsync(HOSTNAME_FILE, newHostname);
 
             // Update Hosts
             String hostsFile = File.ReadAllText(HOSTS_FILE);
             hostsFile = hostsFile.Replace(oldHostname, newHostname);
-            File.WriteAllText(HOSTS_FILE, hostsFile);
+            await File.WriteAllTextAsync(HOSTS_FILE, hostsFile);
         }
 
         public async Task SetImage(Int32 displayId, Bitmap image)
@@ -116,10 +116,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
             Byte[] pixelData = await GetBitmapBytesAsync(info.Width, info.Height, info.PixelFormat, image);
 
-            using (FileStream fs = new FileStream(info.DevNode, FileMode.Open, FileAccess.Write, FileShare.None))
-            {
-                await fs.WriteAsync(pixelData);
-            }
+            await File.WriteAllBytesAsync(info.DevNode, pixelData);
         }
 
         private FramebufferInfo GetFramebufferInfo(Int32 displayId)
@@ -229,14 +226,14 @@ namespace Heffsoft.PecsRemote.Api.Services
             });
         }
 
-        public void Reboot()
+        public Task Reboot()
         {
-            RunBashAsync(REBOOT_CMD);
+            return RunBashAsync(REBOOT_CMD);
         }
 
-        public void ConfigureAdHoc()
+        public async Task ConfigureAdHoc()
         {
-            SetHostname("pecsremote");
+            await SetHostname("pecsremote");
 
             String suffix = Mac.Replace(":", "").GetLast(4);
             String ssid = $"{Hostname}_{suffix}";

@@ -15,16 +15,16 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
 
         Task<IEnumerable<String>> ScanForWiFi();
 
-        void SetHostname(String hostname);
-        void ConfigureAdHoc();
-        void ConnectToWiFi(String ssid, String key);
-        void ConnectToWiFi(String ssid, String username, String password);
+        Task SetHostname(String hostname);
+        Task ConfigureAdHoc();
+        Task ConnectToWiFi(String ssid, String key);
+        Task ConnectToWiFi(String ssid, String username, String password);
 
-        void ConfigureIPSettings();
-        void ConfigureIPSettings(String ipv4, String subnet, String gateway, String primaryDns, String secondaryDns);
+        Task ConfigureIPSettings();
+        Task ConfigureIPSettings(String ipv4, String subnet, String gateway, String primaryDns, String secondaryDns);
 
         Task SetImage(Int32 displayId, Bitmap image);
 
-        void Reboot();
+        Task Reboot();
     }
 }
