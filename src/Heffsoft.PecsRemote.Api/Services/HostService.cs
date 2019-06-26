@@ -76,20 +76,24 @@ namespace Heffsoft.PecsRemote.Api.Services
             throw new NotImplementedException();
         }
 
-        public IEnumerable<String> ScanForWiFi()
+        public async Task<IEnumerable<String>> ScanForWiFi()
         {
             Regex ssid = new Regex("ESSID:\"(?<ssid>[\\s\\S]{1,32})\"");
 
-            String scanOutput = RunBash(WIFI_SCAN_CMD);
+            String scanOutput = await RunBashAsync(WIFI_SCAN_CMD);
+
+            List<String> ssidList = new List<String>();
 
             foreach (String line in scanOutput.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
             {
                 Match match = ssid.Match(line);
                 if(match.Success)
                 {
-                    yield return match.Groups["ssid"].Value;
+                    ssidList.Add(match.Groups["ssid"].Value);
                 }
             }
+
+            return ssidList;
         }
 
         public void SetHostname(String hostname)
@@ -106,13 +110,16 @@ namespace Heffsoft.PecsRemote.Api.Services
             File.WriteAllText(HOSTS_FILE, hostsFile);
         }
 
-        public void SetImage(Int32 displayId, Bitmap image)
+        public async Task SetImage(Int32 displayId, Bitmap image)
         {
             FramebufferInfo info = GetFramebufferInfo(displayId);
 
-            Byte[] pixelData = GetBitmapBytes(info.Width, info.Height, info.PixelFormat, image);
+            Byte[] pixelData = await GetBitmapBytesAsync(info.Width, info.Height, info.PixelFormat, image);
 
-            File.WriteAllBytes(info.DevNode, pixelData);
+            using (FileStream fs = new FileStream(info.DevNode, FileMode.Open, FileAccess.Write, FileShare.None))
+            {
+                await fs.WriteAsync(pixelData);
+            }
         }
 
         private FramebufferInfo GetFramebufferInfo(Int32 displayId)
@@ -156,69 +163,75 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
         }
 
-        private static Byte[] GetBitmapBytes(Int32 width, Int32 height, PixelFormat pixelFormat, Bitmap image)
+        private static Task<Byte[]> GetBitmapBytesAsync(Int32 width, Int32 height, PixelFormat pixelFormat, Bitmap image)
         {
-            Bitmap dest = new Bitmap(width, height, pixelFormat);
-            dest.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using(Graphics gfx = Graphics.FromImage(dest))
+            return Task.Run(() =>
             {
-                gfx.CompositingQuality = CompositingQuality.HighQuality;
-                gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                gfx.SmoothingMode = SmoothingMode.HighQuality;
+                Bitmap dest = new Bitmap(width, height, pixelFormat);
+                dest.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-                gfx.FillRectangle(Brushes.Black, 0, 0, width, height);
+                using (Graphics gfx = Graphics.FromImage(dest))
+                {
+                    gfx.CompositingQuality = CompositingQuality.HighQuality;
+                    gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    gfx.SmoothingMode = SmoothingMode.HighQuality;
 
-                Single scaleX = (Single)image.Width / width;
-                Single scaleY = (Single)image.Height / height;
-                Single scale = (scaleX < scaleY) ? scaleX : scaleY;
+                    gfx.FillRectangle(Brushes.Black, 0, 0, width, height);
 
-                Int32 drawWidth = (Int32)(image.Width / scale);
-                Int32 drawHeight = (Int32)(image.Height / scale);
+                    Single scaleX = (Single)image.Width / width;
+                    Single scaleY = (Single)image.Height / height;
+                    Single scale = (scaleX < scaleY) ? scaleX : scaleY;
 
-                Int32 ofsX = (Int32)((drawWidth - width) * 0.5f);
-                Int32 ofsY = (Int32)((drawHeight - height) * 0.5f);
+                    Int32 drawWidth = (Int32)(image.Width / scale);
+                    Int32 drawHeight = (Int32)(image.Height / scale);
 
-                gfx.DrawImage(image, ofsX, ofsY, drawWidth, drawHeight);
-            }
+                    Int32 ofsX = (Int32)((drawWidth - width) * 0.5f);
+                    Int32 ofsY = (Int32)((drawHeight - height) * 0.5f);
 
-            Rectangle rect = new Rectangle(0, 0, width, height);
-            BitmapData bitmapData = dest.LockBits(rect, ImageLockMode.ReadOnly, pixelFormat);
-            Byte[] pixelData = new Byte[width * height * Image.GetPixelFormatSize(pixelFormat)];
-            Marshal.Copy(bitmapData.Scan0, pixelData, 0, pixelData.Length);
-            dest.UnlockBits(bitmapData);
+                    gfx.DrawImage(image, ofsX, ofsY, drawWidth, drawHeight);
+                }
 
-            return pixelData;
+                Rectangle rect = new Rectangle(0, 0, width, height);
+                BitmapData bitmapData = dest.LockBits(rect, ImageLockMode.ReadOnly, pixelFormat);
+                Byte[] pixelData = new Byte[width * height * Image.GetPixelFormatSize(pixelFormat)];
+                Marshal.Copy(bitmapData.Scan0, pixelData, 0, pixelData.Length);
+                dest.UnlockBits(bitmapData);
+
+                return pixelData;
+            });
         }
 
-        private static String RunBash(String cmd)
+        private static Task<String> RunBashAsync(String cmd)
         {
-            String escaped = cmd.Replace("\"", "\\\"");
-            Process process = new Process()
+            return Task.Run(() =>
             {
-                StartInfo = new ProcessStartInfo()
+                String escaped = cmd.Replace("\"", "\\\"");
+                Process process = new Process()
                 {
-                    FileName = "/bin/bash",
-                    Arguments = $"-c \"{escaped}\"",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = "/bin/bash",
+                        Arguments = $"-c \"{escaped}\"",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    }
+                };
 
-            process.Start();
+                process.Start();
 
-            String output = process.StandardOutput.ReadToEnd();
+                String output = process.StandardOutput.ReadToEnd();
 
-            process.WaitForExit();
-            process.Dispose();
+                process.WaitForExit();
+                process.Dispose();
 
-            return output;
+                return output;
+            });
         }
 
         public void Reboot()
         {
-            RunBash(REBOOT_CMD);
+            RunBashAsync(REBOOT_CMD);
         }
 
         public void ConfigureAdHoc()

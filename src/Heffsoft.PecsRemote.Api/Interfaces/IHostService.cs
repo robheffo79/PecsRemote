@@ -13,7 +13,7 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
         String Mac { get; }
         Int32 ConnectedDisplays { get; }
 
-        IEnumerable<String> ScanForWiFi();
+        Task<IEnumerable<String>> ScanForWiFi();
 
         void SetHostname(String hostname);
         void ConfigureAdHoc();
@@ -23,7 +23,7 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
         void ConfigureIPSettings();
         void ConfigureIPSettings(String ipv4, String subnet, String gateway, String primaryDns, String secondaryDns);
 
-        void SetImage(Int32 displayId, Bitmap image);
+        Task SetImage(Int32 displayId, Bitmap image);
 
         void Reboot();
     }
