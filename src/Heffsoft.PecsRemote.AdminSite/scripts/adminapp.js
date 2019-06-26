@@ -129,7 +129,7 @@
     },
 
     setup() {
-        alert('Not Implemented.');
+        adminApp.setMainPanel('btnSetup', 'components/setup/main.html');
     },
 
     history() {
@@ -139,6 +139,20 @@
     logout() {
         window.sessionStorage.removeItem('token');
         adminApp.login();
+    },
+
+    setMainPanel(buttonId, url) {
+        $.ajax({ url: url, crossDomain: true }).done(function (html) {
+            $('#pnlMain').empty().append(html);
+
+            var active = $('#navMain').find('.active');
+            active.find('.sr-only').remove();
+            active.removeClass('active');
+
+            var btn = $('#' + buttonId);
+            btn.addClass('active');
+            btn.append('<span class="sr-only"> (current)</span>');
+        });
     }
 };
 

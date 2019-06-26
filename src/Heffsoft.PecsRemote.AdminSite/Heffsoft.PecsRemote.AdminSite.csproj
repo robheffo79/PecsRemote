@@ -9,6 +9,7 @@
     <Content Include="components\header.html" />
     <Content Include="components\login.html" />
     <Content Include="components\main.html" />
+    <Content Include="components\setup\main.html" />
     <Content Include="css\bootstrap-4.3.1.min.css" />
     <Content Include="css\fontawesome-5.9.0.min.css" />
     <Content Include="css\global.css" />
