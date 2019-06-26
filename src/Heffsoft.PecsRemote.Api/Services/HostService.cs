@@ -12,6 +12,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Net;
+using System.Net.Sockets;
+using System.Net.PeerToPeer;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
