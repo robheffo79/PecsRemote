@@ -7,9 +7,11 @@
   <ItemGroup>
     <Content Include="components\footer.html" />
     <Content Include="components\header.html" />
+    <Content Include="components\home\main.html" />
     <Content Include="components\login.html" />
     <Content Include="components\main.html" />
     <Content Include="components\setup\main.html" />
+    <Content Include="components\updates\main.html" />
     <Content Include="css\bootstrap-4.3.1.min.css" />
     <Content Include="css\fontawesome-5.9.0.min.css" />
     <Content Include="css\global.css" />
@@ -19,6 +21,7 @@
     <Content Include="index.html" />
     <Content Include="scripts\adminapp.js" />
     <Content Include="scripts\bootstrap-4.3.1.min.js" />
+    <Content Include="scripts\fontawesome-5.9.0.min.js" />
     <Content Include="scripts\handlebars-4.1.2.min.js" />
     <Content Include="scripts\jquery-3.4.1.min.js" />
     <Content Include="scripts\popper.min.js" />

@@ -3,6 +3,17 @@
     margin: 1em;
 }
 
+footer {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%
+}
+
+.main {
+    padding-top: 58px;
+}
+
 .login-form {
     border: 1px solid #59606d;
     border-radius: 0.5em;

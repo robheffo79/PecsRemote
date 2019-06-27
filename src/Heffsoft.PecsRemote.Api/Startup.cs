@@ -24,6 +24,8 @@ namespace Heffsoft.PecsRemote.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddDataContext();
             services.AddApiServices();
 

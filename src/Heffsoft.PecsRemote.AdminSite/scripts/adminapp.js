@@ -106,8 +106,9 @@
         $.when(
             $.ajax({ url: 'components/header.html', crossDomain: true }),
             $.ajax({ url: 'components/main.html', crossDomain: true }),
-            $.ajax({ url: 'components/footer.html', crossDomain: true })
-        ).done(function (header, main, footer) {
+            $.ajax({ url: 'components/footer.html', crossDomain: true }),
+            $.ajax({ url: 'api/system/updates', crossDomain: true}),
+        ).done(function (header, main, footer, updates) {
             $('.main-container').append(header[0]).append(main[0]).append(footer[0]);
             $('#btnTitle').on('click', function () { adminApp.home(); });
             $('#btnHome').on('click', function () { adminApp.home(); });
@@ -115,13 +116,21 @@
             $('#btnSetup').on('click', function () { adminApp.setup(); });
             $('#btnHistory').on('click', function () { adminApp.history(); });
             $('#btnLogout').on('click', function () { adminApp.logout(); });
+            $('#btnUpdates').on('click', function () { adminApp.applyUpdates(); });
+
+            if (updates[0] > 0) {
+                $('#txtUpdateCount').html = updates[0];
+                $('#btnUpdates').removeAttr('hidden');
+            }
+
+            adminApp.home();
         });
 
         adminApp.popLoader();
     },
 
     home() {
-        alert('Not Implemented.');
+        adminApp.setMainPanel('btnSetup', 'components/main.html');
     },
 
     playlists() {
@@ -141,7 +150,40 @@
         adminApp.login();
     },
 
-    setMainPanel(buttonId, url) {
+    applyUpdates() {
+        var dots = 1;
+        var phase = 1;
+
+        adminApp.setMainPanel('btnUpdates', 'components/updates/main.html', function () {
+            var checkHandle = window.setInterval(function () {
+
+                $.ajax({ uri: 'api/system/status', crossDomain: true, timeout: 500 }).done(function (data) {
+                    if (phase == 1) {
+                        $('.updates').empty().append('<p>Applying Updates. Please Wait' + ('.'.repeat(dots)) + '</p>');
+                        if (++dots >= 4) {
+                            dots = 1;
+                        }
+                    } else if (phase == 2) {
+                        clearInterval(checkHandle);
+                        window.sessionStorage.removeItem('token');
+                        location.reload(true);
+                    }
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    $('.updates').empty().append('<p>Rebooting. Please Wait' + ('.'.repeat(dots)) + '</p>');
+                    if (++dots >= 4) {
+                        dots = 1;
+                    }
+
+                    if (phase == 1) {
+                        phase = 2;
+                    }
+                })
+
+            }, 1000);
+        });
+    },
+
+    setMainPanel(buttonId, url, then) {
         $.ajax({ url: url, crossDomain: true }).done(function (html) {
             $('#pnlMain').empty().append(html);
 
@@ -152,6 +194,10 @@
             var btn = $('#' + buttonId);
             btn.addClass('active');
             btn.append('<span class="sr-only"> (current)</span>');
+
+            if (then !== undefined) {
+                then();
+            }
         });
     }
 };

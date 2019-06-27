@@ -20,6 +20,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class HostService : IHostService
     {
+        private const String CHECKUPDATES_CMD = "/usr/lib/update-notifier/apt-check";
         private const String REBOOT_CMD = "reboot";
         private const String WIFI_SCAN_CMD = "iwlist wlan0 scan";
         private const String INTERFACES_FILE = "/etc/network/interfaces";
@@ -32,6 +33,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         private const String VIRTUAL_SIZE_NODE = "virtual_size";
         private const String BPP_NODE = "bits_per_pixel";
         private const String FRAMEBUFFER_NODES = "fb";
+        private const String UPTIME_FILE = "/proc/uptime";
 
         public String Hostname => File.ReadAllText(HOSTNAME_FILE);
 
@@ -55,6 +57,16 @@ namespace Heffsoft.PecsRemote.Api.Services
         }
 
         public String Mac => File.ReadAllText(MAC_FILE);
+
+        public TimeSpan Uptime
+        {
+            get
+            {
+                String uptime = File.ReadAllText(UPTIME_FILE);
+                String[] parts = uptime.Split(' ');
+                return TimeSpan.FromSeconds(Double.Parse(parts[0]));
+            }
+        }
 
         public Task ConfigureIPSettings()
         {
@@ -198,9 +210,9 @@ namespace Heffsoft.PecsRemote.Api.Services
             });
         }
 
-        private static Task<String> RunBashAsync(String cmd)
+        private static Task<String> RunBashAsync(String cmd, Boolean captureOutput = true)
         {
-            return Task.Run(() =>
+            return Task.Run(async () =>
             {
                 String escaped = cmd.Replace("\"", "\\\"");
                 Process process = new Process()
@@ -209,7 +221,8 @@ namespace Heffsoft.PecsRemote.Api.Services
                     {
                         FileName = "/bin/bash",
                         Arguments = $"-c \"{escaped}\"",
-                        RedirectStandardOutput = true,
+                        RedirectStandardOutput = captureOutput,
+                        RedirectStandardError = captureOutput,
                         UseShellExecute = false,
                         CreateNoWindow = true
                     }
@@ -217,7 +230,16 @@ namespace Heffsoft.PecsRemote.Api.Services
 
                 process.Start();
 
-                String output = process.StandardOutput.ReadToEnd();
+                String output = null;
+
+                if (captureOutput)
+                {
+                    output = await process.StandardOutput.ReadToEndAsync();
+                    if (String.IsNullOrWhiteSpace(output))
+                    {
+                        output = await process.StandardError.ReadToEndAsync();
+                    }
+                }
 
                 process.WaitForExit();
                 process.Dispose();
@@ -228,7 +250,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public Task Reboot()
         {
-            return RunBashAsync(REBOOT_CMD);
+            return RunBashAsync(REBOOT_CMD, false);
         }
 
         public async Task ConfigureAdHoc()
@@ -245,6 +267,113 @@ namespace Heffsoft.PecsRemote.Api.Services
             sb.Append($"auto wlan0\niface wlan0 inet static\n  address 192.168.1.254\n  netmask 255.255.255.0\n  wireless-channel 6\n");
             sb.Append($"  wireless-essid {ssid}\nwireless-mode ad-hoc\n");
             File.WriteAllText(INTERFACES_FILE, sb.ToString());
+        }
+
+        public Task<HostSettings> GetHostSettings()
+        {
+            return Task.FromResult(new HostSettings()
+            {
+                Hostname = Hostname
+            });
+        }
+
+        public async Task<NetworkSettings> GetNetworkSettings()
+        {
+            NetworkSettings settings = new NetworkSettings();
+
+            IEnumerable<String> lines = (await File.ReadAllLinesAsync(INTERFACES_FILE)).Select(l => l.ToLowerInvariant());
+
+            Boolean inSection = false;
+            foreach(String line in lines)
+            {
+                String trimmed = line.Trim();
+
+                if (trimmed.StartsWith("#"))
+                    continue;
+
+                if (inSection == false)
+                {
+                    if (trimmed.StartsWith("iface wlan0"))
+                    {
+                        inSection = true;
+                        settings.UseDhcp = line.Contains("dhcp") && line.Contains("static") == false;
+                    }
+                }
+                else
+                {
+                    if (String.IsNullOrWhiteSpace(line) || String.IsNullOrWhiteSpace(line[0].ToString()) == false)
+                    {
+                        inSection = false;
+                        break;
+                    }
+
+                    String[] parts = trimmed.Split(new Char[] { ' ' }, 2);
+                    switch (parts[0])
+                    {
+                        case "address":
+                            settings.IPAddress = parts[1];
+                            break;
+
+                        case "netmask":
+                            settings.SubnetMask = parts[1];
+                            break;
+
+                        case "gateway":
+                            settings.GatewayAddress = parts[1];
+                            break;
+
+                        case "wpa-ssid":
+                        case "wireless-essid":
+                            settings.SSID = Dequote(parts[1]);
+                            break;
+
+                        case "wpa-psk":
+                        case "wireless-key":
+                            settings.Key = Dequote(parts[1]);
+                            break;
+
+                        case "dns-nameservers":
+                            settings.DNSServers = parts[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            break;
+                    }
+                }
+            }
+
+            return settings;
+        }
+
+        private String Dequote(String text)
+        {
+            if(text.StartsWith("\"") && text.EndsWith("\""))
+            {
+                return text.Substring(1, text.Length - 2).Replace("\\\"", "\"");
+            }
+
+            return text;
+        }
+
+        public async Task<Int32> GetUpdatesAvailable()
+        {
+            String output = await RunBashAsync(CHECKUPDATES_CMD);
+            String[] counts = output.Split(';');
+
+            if (Int32.TryParse(counts[0], out Int32 updates))
+                return updates;
+
+            return 0;
+        }
+
+        public Task ApplyUpdates()
+        {
+            return Task.Run(async () =>
+            {
+                await RunBashAsync("apt-get update", false);
+                await RunBashAsync("apt-get -y upgrade", false);
+                await RunBashAsync("apt-get -y dist-upgrade", false);
+                await RunBashAsync("apt-get -y autoremove", false);
+                await RunBashAsync("fstrim /", false);
+                await RunBashAsync(REBOOT_CMD, false);
+            });
         }
     }
 }
