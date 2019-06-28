@@ -14,7 +14,7 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
         String Mac { get; }
         Int32 ConnectedDisplays { get; }
 
-        TimeSpan Uptime { get; }
+        Double Uptime { get; }
 
         Task<Int32> GetUpdatesAvailable();
 

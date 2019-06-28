@@ -32,7 +32,7 @@ namespace Heffsoft.PecsRemote.Api.Controllers
             return Ok(updateCount);
         }
 
-        [HttpPost, Route("updates")]
+        [HttpPost, Route("update")]
         public async Task<IActionResult> ApplyUpdates()
         {
             await hostService.ApplyUpdates();

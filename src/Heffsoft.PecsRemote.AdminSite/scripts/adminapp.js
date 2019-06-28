@@ -152,34 +152,33 @@
 
     applyUpdates() {
         var dots = 1;
-        var phase = 1;
+        var previousUptime = 0;
 
         adminApp.setMainPanel('btnUpdates', 'components/updates/main.html', function () {
-            var checkHandle = window.setInterval(function () {
+            $.ajax({ url: 'api/system/update', crossDomain: true, method: 'POST' }).done(function () {
+                var checkHandle = window.setInterval(function () {
 
-                $.ajax({ uri: 'api/system/status', crossDomain: true, timeout: 500 }).done(function (data) {
-                    if (phase == 1) {
-                        $('.updates').empty().append('<p>Applying Updates. Please Wait' + ('.'.repeat(dots)) + '</p>');
+                    $.ajax({ url: 'api/system/status', crossDomain: true, timeout: 500 }).done(function (data) {
+                        if (data.uptime < previousUptime) {
+                            clearInterval(checkHandle);
+                            window.sessionStorage.removeItem('token');
+                            location.reload(true);
+                        } else {
+                            previousUptime = data.uptime;
+                            $('.updates').empty().append('<p>Applying Updates. Please Wait' + ('.'.repeat(dots)) + '</p>');
+                            if (++dots >= 4) {
+                                dots = 1;
+                            }
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $('.updates').empty().append('<p>Rebooting. Please Wait' + ('.'.repeat(dots)) + '</p>');
                         if (++dots >= 4) {
                             dots = 1;
                         }
-                    } else if (phase == 2) {
-                        clearInterval(checkHandle);
-                        window.sessionStorage.removeItem('token');
-                        location.reload(true);
-                    }
-                }).fail(function (jqXHR, textStatus, errorThrown) {
-                    $('.updates').empty().append('<p>Rebooting. Please Wait' + ('.'.repeat(dots)) + '</p>');
-                    if (++dots >= 4) {
-                        dots = 1;
-                    }
+                    });
 
-                    if (phase == 1) {
-                        phase = 2;
-                    }
-                })
-
-            }, 1000);
+                }, 1000);
+            });
         });
     },
 

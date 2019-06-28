@@ -58,13 +58,13 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public String Mac => File.ReadAllText(MAC_FILE);
 
-        public TimeSpan Uptime
+        public Double Uptime
         {
             get
             {
                 String uptime = File.ReadAllText(UPTIME_FILE);
                 String[] parts = uptime.Split(' ');
-                return TimeSpan.FromSeconds(Double.Parse(parts[0]));
+                return Double.Parse(parts[0]);
             }
         }
 
@@ -208,6 +208,12 @@ namespace Heffsoft.PecsRemote.Api.Services
 
                 return pixelData;
             });
+        }
+
+        private static void ForkBash(String cmd)
+        {
+            String escaped = cmd.Replace("\"", "\\\"");
+            Process process = Process.Start("/bin/bash", $"-c \"{escaped}\"");
         }
 
         private static Task<String> RunBashAsync(String cmd, Boolean captureOutput = true)
@@ -365,14 +371,10 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public Task ApplyUpdates()
         {
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
-                await RunBashAsync("apt-get update", false);
-                await RunBashAsync("apt-get -y upgrade", false);
-                await RunBashAsync("apt-get -y dist-upgrade", false);
-                await RunBashAsync("apt-get -y autoremove", false);
-                await RunBashAsync("fstrim /", false);
-                await RunBashAsync(REBOOT_CMD, false);
+                String cmd = "apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y autoremove && fstrim / && reboot";
+                ForkBash(cmd);
             });
         }
     }
