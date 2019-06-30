@@ -16,6 +16,8 @@ namespace Heffsoft.PecsRemote.Api.Services
     {
         public static IServiceCollection AddApiServices(this IServiceCollection services)
         {
+            services.AddSingleton<ICastService, CastService>();
+
             return services.AddTransient<IRandomService, RandomService>()
                            .AddTransient<IUserService, UserService>()
                            .AddTransient<IHostService, HostService>()

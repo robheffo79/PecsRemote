@@ -46,7 +46,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                 receivers = seenReceivers.Values.ToArray();
             }
 
-            return Task.FromResult(receivers.Select(r => new CastTarget() { Id = r.Id, Name = r.FriendlyName, Address = r.IPEndPoint.Address }));
+            return Task.FromResult(receivers.Select(r => new CastTarget() { Id = r.Id, Name = r.FriendlyName, Address = r.IPEndPoint.Address.ToString() }));
         }
 
         public async Task<Boolean> ConnectToCastReceiver(String id)

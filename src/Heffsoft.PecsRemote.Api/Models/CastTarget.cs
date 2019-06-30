@@ -10,6 +10,6 @@ namespace Heffsoft.PecsRemote.Api.Models
     {
         public String Id { get; set; }
         public String Name { get; set; }
-        public IPAddress Address { get; set; }
+        public String Address { get; set; }
     }
 }
