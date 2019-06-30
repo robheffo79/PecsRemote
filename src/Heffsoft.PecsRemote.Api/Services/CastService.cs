@@ -21,12 +21,15 @@ namespace Heffsoft.PecsRemote.Api.Services
         private IMediaChannel mediaChannel;
         private MediaStatus mediaStatus;
 
+        public String CurrentReceiver { get; private set; }
+
         public CastService()
         {
             seenReceivers = new Dictionary<String, IReceiver>();
             deviceLocator = new DeviceLocator();
             deviceLocatorObserver = deviceLocator.FindReceiversContinuous();
             deviceLocatorObserver.Subscribe(d => ProcessDevice(d));
+            CurrentReceiver = null;
         }
 
         private void ProcessDevice(IReceiver device)
@@ -69,10 +72,12 @@ namespace Heffsoft.PecsRemote.Api.Services
                 mediaChannel = sender.GetChannel<IMediaChannel>();
                 await sender.LaunchAsync(mediaChannel);
 
+                CurrentReceiver = id;
                 return true;
             }
             catch
             {
+                CurrentReceiver = null;
                 return false;
             }
         }

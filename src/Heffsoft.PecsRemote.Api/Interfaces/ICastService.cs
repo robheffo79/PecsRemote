@@ -8,6 +8,8 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
 {
     public interface ICastService
     {
+        String CurrentReceiver { get; }
+
         Task<IEnumerable<CastTarget>> GetCastReceivers();
         Task<Boolean> ConnectToCastReceiver(String id);
         Task DisconnectCastReceiver();
