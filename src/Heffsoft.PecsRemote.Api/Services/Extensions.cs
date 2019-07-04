@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
@@ -19,6 +20,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             services.AddSingleton<ICastService, CastService>();
 
             return services.AddTransient<IRandomService, RandomService>()
+                           .AddTransient<IEventLogService, EventLogService>()
                            .AddTransient<IUserService, UserService>()
                            .AddTransient<IHostService, HostService>()
                            .AddTransient<IMediaService, MediaService>();
@@ -64,6 +66,12 @@ namespace Heffsoft.PecsRemote.Api.Services
                 return text;
 
             return text.Substring(text.Length - tailLength);
+        }
+
+        public static Boolean IsYouTubeUrl(this Uri uri)
+        {
+            Regex ytRegex = new Regex(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");
+            return ytRegex.IsMatch(uri.ToString());
         }
     }
 }

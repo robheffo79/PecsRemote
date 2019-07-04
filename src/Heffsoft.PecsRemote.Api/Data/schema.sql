@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `Settings` (
 	`Id` INT NOT NULL AUTO_INCREMENT,
 	`Key` VARCHAR(64) NOT NULL,
 	`Value` VARCHAR(MAX) NOT NULL,
-	PRIMARY_KEY (`Id`)
+	PRIMARY KEY (`Id`)
 ) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS `Playlists` (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `Playlists` (
 	`CreatedByUserId` INT NOT NULL,
 	`LastUpdated` DATETIME NOT NULL,
 	`LastUpdatedByUserId` INT NOT NULL,
-	PRIMARY_KEY(`Id`)
+	PRIMARY KEY(`Id`)
 ) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS `Media` (
@@ -37,12 +37,14 @@ CREATE TABLE IF NOT EXISTS `Media` (
 	`Name` VARCHAR(64) NOT NULL,
 	`Image` CHAR(36) NOT NULL,
 	`Url` VARCHAR(2083) NOT NULL,
+	`FilePath` VARCHAR(2048) NULL,
+	`Duration` BIGINT NOT NULL,
 	`Enabled` BIT NOT NULL,
 	`Created` DATETIME NOT NULL,
 	`CreatedByUserId` INT NOT NULL,
 	`LastUpdated` DATETIME NOT NULL,
 	`LastUpdatedByUserId` INT NOT NULL,
-	PRIMARY_KEY(`Id`)
+	PRIMARY KEY(`Id`)
 ) ENGINE=INNODB;
 
 CREATE TABLE IF NOT EXISTS `PlaylistEntries` (
@@ -52,7 +54,16 @@ CREATE TABLE IF NOT EXISTS `PlaylistEntries` (
 	`Order` INT NOT NULL,
 	`Added` DATETIME NOT NULL,
 	`AddedByUserId` INT NOT NULL,
-	PRIMARY_KEY(`PlaylistId`, `MediaId`)
+	PRIMARY KEY(`PlaylistId`, `MediaId`)
+) ENGINE=INNODB;
+
+CREATE TABLE IF NOT EXISTS `EventLog` (
+	`Id` INT NOT NULL AUTO_INCREMENT,
+	`Timestamp` DATETIME NOT NULL,
+	`Source` VARCHAR(64) NOT NULL,
+	`Message` VARCHAR(2048) NOT NULL,
+	`Data` BLOB(32768) NULL,
+	PRIMARY KEY(`Id`)
 ) ENGINE=INNODB;
 
 SET @x := (SELECT COUNT(*) FROM `information_schema`.`statistics` WHERE `table_name` = 'table' AND `index_name` = 'IX_Table_XYZ' AND `table_schema` = DATABASE());

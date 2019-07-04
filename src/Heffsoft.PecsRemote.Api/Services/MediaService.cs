@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using YoutubeExplode;
+using YoutubeExplode.Models;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -39,6 +41,8 @@ namespace Heffsoft.PecsRemote.Api.Services
                 Url = url.ToString(),
                 Enabled = true,
                 Created = DateTime.UtcNow,
+                FilePath = null,
+                Duration = GetDuration(url),
                 CreatedByUserId = userService.CurrentUser?.Id ?? -1,
                 LastUpdated = DateTime.UtcNow,
                 LastUpdatedByUserId = userService.CurrentUser?.Id ?? -1
@@ -46,6 +50,19 @@ namespace Heffsoft.PecsRemote.Api.Services
 
             media.Id = mediaRepo.Insert(media);
             return media;
+        }
+
+        private TimeSpan GetDuration(Uri url)
+        {
+            if(url.IsYouTubeUrl())
+            {
+                String id = YoutubeClient.ParseVideoId(url.ToString());
+                YoutubeClient client = new YoutubeClient();
+                Video videoInfo = client.GetVideoAsync(id).Result;
+                return videoInfo.Duration;
+            }
+
+            return TimeSpan.Zero;
         }
 
         public void DeleteMedia(Int32 id)

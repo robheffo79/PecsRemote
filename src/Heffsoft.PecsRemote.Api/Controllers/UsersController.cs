@@ -9,10 +9,12 @@ namespace Heffsoft.PecsRemote.Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private readonly IEventLogService eventLogService;
         private readonly IUserService userService;
 
-        public UsersController(IUserService userService)
+        public UsersController(IEventLogService eventLogService, IUserService userService)
         {
+            this.eventLogService = eventLogService;
             this.userService = userService;
         }
 
@@ -24,8 +26,12 @@ namespace Heffsoft.PecsRemote.Api.Controllers
 
             String token = userService.AuthenticateUser(authenticationRequest.Username, authenticationRequest.Password);
             if (String.IsNullOrWhiteSpace(token))
+            {
+                eventLogService.Log("Users", $"Failed login attempt for user '{authenticationRequest.Username}'");
                 return Unauthorized();
+            }
 
+            eventLogService.Log("Users", $"Successful login attempt for user '{authenticationRequest.Username}'");
             return Ok(new { token });
         }
     }

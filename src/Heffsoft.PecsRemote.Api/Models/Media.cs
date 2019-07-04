@@ -15,6 +15,8 @@ namespace Heffsoft.PecsRemote.Api.Models
         public String Url { get; set; }
         public Boolean Enabled { get; set; }
         public DateTime Created { get; set; }
+        public String FilePath { get; set; }
+        public TimeSpan Duration { get; set; }
         public Int32 CreatedByUserId { get; set; }
         public DateTime LastUpdated { get; set; }
         public Int32 LastUpdatedByUserId { get; set; }

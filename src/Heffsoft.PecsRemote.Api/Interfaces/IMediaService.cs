@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Interfaces
 {
-    interface IMediaService
+    public interface IMediaService
     {
         Media AddMedia(String name, Guid image, Uri url);
 
