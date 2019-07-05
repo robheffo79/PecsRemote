@@ -12,10 +12,12 @@ namespace Heffsoft.PecsRemote.Api.Controllers
     [ApiController]
     public class SystemController : ControllerBase
     {
+        private readonly IEventLogService eventLogService;
         private readonly IHostService hostService;
 
-        public SystemController(IHostService hostService)
+        public SystemController(IEventLogService eventLogService, IHostService hostService)
         {
+            this.eventLogService = eventLogService;
             this.hostService = hostService;
         }
 
@@ -35,6 +37,7 @@ namespace Heffsoft.PecsRemote.Api.Controllers
         [HttpPost, Route("update")]
         public async Task<IActionResult> ApplyUpdates()
         {
+            eventLogService.Log("System", "Began applying updates.");
             await hostService.ApplyUpdates();
             return NoContent();
         }

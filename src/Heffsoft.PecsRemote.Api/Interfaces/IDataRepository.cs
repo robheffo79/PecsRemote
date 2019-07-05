@@ -8,13 +8,13 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
     public interface IDataRepository<T>
     {
         IEnumerable<T> GetAll();
-        T Get(Int32 id);
+        T Get<U>(U id);
 
         IEnumerable<T> Find(String where, Object args);
 
-        Int32 Insert(T obj);
+        U Insert<U>(T obj);
         void Update(T obj);
         void Delete(T obj);
-        void Delete(Int32 id);
+        void Delete<U>(U id);
     }
 }

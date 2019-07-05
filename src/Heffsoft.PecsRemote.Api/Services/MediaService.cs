@@ -23,7 +23,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             this.mediaRepo = this.dataContext.GetRepository<Media>();
         }
 
-        public Media AddMedia(String name, Guid image, Uri url)
+        public Media CreateMedia(String name, Uri url)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -37,7 +37,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             Media media = new Media()
             {
                 Name = name,
-                Image = image,
+                Image = Guid.Empty,
                 Url = url.ToString(),
                 Enabled = true,
                 Created = DateTime.UtcNow,
@@ -49,6 +49,33 @@ namespace Heffsoft.PecsRemote.Api.Services
             };
 
             media.Id = mediaRepo.Insert(media);
+            return media;
+        }
+
+        public Media CreateMedia(String name)
+        {
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            if (String.IsNullOrWhiteSpace(name))
+                throw new ArgumentException($"{nameof(name)} is empty.");
+
+            Media media = new Media()
+            {
+                Name = name,
+                Image = Guid.Empty,
+                Url = null,
+                Enabled = false,
+                Created = DateTime.UtcNow,
+                FilePath = null,
+                Duration = TimeSpan.Zero,
+                CreatedByUserId = userService.CurrentUser?.Id ?? -1,
+                LastUpdated = DateTime.UtcNow,
+                LastUpdatedByUserId = userService.CurrentUser?.Id ?? -1
+            };
+
+            media.Id = mediaRepo.Insert(media);
+
             return media;
         }
 

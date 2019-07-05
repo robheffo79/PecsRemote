@@ -50,6 +50,12 @@ namespace Heffsoft.PecsRemote.Api.Controllers
             return NotFound();
         }
 
+        [HttpPost]
+        public IActionResult Create([FromBody]MediaCreation media)
+        {
+            mediaService.AddMedia()
+        }
+
         private Boolean IsYouTubeUrl(String url)
         {
             Regex ytRegex = new Regex(@"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$");

@@ -24,7 +24,7 @@ namespace Heffsoft.PecsRemote.Api.Data
             context.Connection.Execute(query, obj, context.Transaction);
         }
 
-        public void Delete(Int32 id)
+        public void Delete<U>(U id)
         {
             String query = $"DELETE FROM `{tableName}` WHERE `Id` = @Id;";
             context.Connection.Execute(query, new { Id = id }, context.Transaction);
@@ -36,7 +36,7 @@ namespace Heffsoft.PecsRemote.Api.Data
             return context.Connection.Query<T>(query, args, context.Transaction);
         }
 
-        public T Get(Int32 id)
+        public T Get<U>(U id)
         {
             String query = $"SELECT * FROM `{tableName}` WHERE `Id` = @Id;";
             return context.Connection.QuerySingleOrDefault<T>(query, new { Id = id }, context.Transaction);
@@ -48,10 +48,10 @@ namespace Heffsoft.PecsRemote.Api.Data
             return context.Connection.Query<T>(query, null, context.Transaction);
         }
 
-        public Int32 Insert(T obj)
+        public U Insert<U>(T obj)
         {
             String query = typeof(T).GetInsertQuery();
-            return context.Connection.ExecuteScalar<Int32>(query, obj, context.Transaction);
+            return context.Connection.ExecuteScalar<U>(query, obj, context.Transaction);
         }
 
         public void Update(T obj)
