@@ -15,11 +15,14 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
         void GenerateImage(Int32 id);
         void GenerateImage(Media media);
 
-        void SetImage(Int32 id, Stream image);
-        void SetImage(Media media, Stream image);
+        void SetImage(Int32 id, Stream image, String mimeType);
+        void SetImage(Media media, Stream image, String mimeType);
 
-        void SetContent(Int32 id, Stream content);
-        void SetContent(Media media, Stream content);
+        void SetContent(Int32 id, Stream content, String mimeType);
+        void SetContent(Media media, Stream content, String mimeType);
+
+        void IncrementViews(Int32 id);
+        void IncrementViews(Media media);
 
         void DeleteMedia(Int32 id);
         void EnableMedia(Int32 id);

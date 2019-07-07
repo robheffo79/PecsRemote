@@ -112,13 +112,14 @@
             $('.main-container').append(header[0]).append(main[0]).append(footer[0]);
             $('#btnTitle').on('click', function () { adminApp.home(); });
             $('#btnHome').on('click', function () { adminApp.home(); });
+            $('#btnMedia').on('click', function () { adminApp.media(); });
             $('#btnPlaylists').on('click', function () { adminApp.playlists(); });
             $('#btnSetup').on('click', function () { adminApp.setup(); });
             $('#btnHistory').on('click', function () { adminApp.history(); });
             $('#btnLogout').on('click', function () { adminApp.logout(); });
             $('#btnUpdates').on('click', function () { adminApp.applyUpdates(); });
 
-            if (updates[0] > 0) {
+            if (updates[0] >= 0) {
                 $('#txtUpdateCount').html = updates[0];
                 $('#btnUpdates').removeAttr('hidden');
             }
@@ -130,7 +131,59 @@
     },
 
     home() {
-        adminApp.setMainPanel('btnSetup', 'components/main.html');
+        adminApp.setMainPanel('btnHome', 'components/main.html');
+    },
+
+    currentMedia: null,
+
+    media() {
+        adminApp.setMainPanel('btnMedia', 'components/media/main.html', function () {
+            var tplMediaItem = Handlebars.compile($('#tplMediaItem').html());
+            var tplMediaPlayer = Handlebars.compile($('#tplMediaPlayer').html());
+            var pnlMediaItems = $('#pnlMediaItems');
+            var pnlMediaPlayer = $('#pnlMediaPlayer');
+
+            adminApp.pushLoader();
+
+            $.ajax({ url: '/api/media', crossDomain: true }).done(function (media) {
+                if (media.length > 0) {
+                    currentMedia = media;
+                    pnlMediaItems.empty();
+
+                    $.each(media, function () {
+                        var item = tplMediaItem(this);
+                        pnlMediaItems.append(item);
+                    });
+
+                    $('.media-link').on('click', function () {
+                        var mediaId = $(this).closest('.media-item').data('media-id');
+                        var mediaItem = currentMedia.find(function(m) {
+                            return m.id === mediaId;
+                        });
+                        var player = tplMediaPlayer(mediaItem);
+                        pnlMediaPlayer.empty();
+                        pnlMediaPlayer.append(player);
+                    });
+                }
+
+                adminApp.popLoader();
+            });
+
+            $('#txtUrl').on('change', function () {
+                var input = $(this);
+                $.ajax({ url: '/api/media/suggest?q=' + encodeURI(input.val()), crossDomain: true}).done(function (result) {
+                    if (result !== 'undefined' && result !== null) {
+                        $('#txtTitle').val(result.title);
+                    }
+                });
+            })
+
+            $('#btnAddMedia').on('click', function () {
+                var addModal = $('#modAddMedia');
+                addModal.modal();
+                addModal.modal('show');
+            });
+        });
     },
 
     playlists() {
@@ -155,30 +208,49 @@
         var previousUptime = 0;
 
         adminApp.setMainPanel('btnUpdates', 'components/updates/main.html', function () {
-            $.ajax({ url: 'api/system/update', crossDomain: true, method: 'POST' }).done(function () {
-                var checkHandle = window.setInterval(function () {
+            var confirmModal = $('#modUpdateConfirm');
 
-                    $.ajax({ url: 'api/system/status', crossDomain: true, timeout: 500 }).done(function (data) {
-                        if (data.uptime < previousUptime) {
-                            clearInterval(checkHandle);
-                            window.sessionStorage.removeItem('token');
-                            location.reload(true);
-                        } else {
-                            previousUptime = data.uptime;
-                            $('.updates').empty().append('<p>Applying Updates. Please Wait' + ('.'.repeat(dots)) + '</p>');
+            $('#btnCancelUpdates').on('click', function () {
+                confirmModal.modal('hide');
+                adminApp.home();
+            });
+
+            $('#btnApplyUpdates').on('click', function () {
+                confirmModal.modal('hide');
+
+                var updateModal = $('#modUpdateProgress');
+                updateModal.modal({ backdrop: 'static', keyboard: false });
+                updateModal.modal('show');
+
+                $.ajax({ url: 'api/system/update', crossDomain: true, method: 'POST' }).done(function () {
+                    var checkHandle = window.setInterval(function () {
+
+                        $.ajax({ url: 'api/system/status', crossDomain: true, timeout: 500 }).done(function (data) {
+                            if (data.uptime < previousUptime) {
+                                clearInterval(checkHandle);
+                                updateModal.modal('hide');
+                                window.sessionStorage.removeItem('token');
+                                location.reload(true);
+                            } else {
+                                previousUptime = data.uptime;
+                                $('.updates').empty().append('<p>Applying Updates. Please Wait' + ('.'.repeat(dots)) + '</p>');
+                                if (++dots >= 4) {
+                                    dots = 1;
+                                }
+                            }
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            $('.updates').empty().append('<p>Rebooting. Please Wait' + ('.'.repeat(dots)) + '</p>');
                             if (++dots >= 4) {
                                 dots = 1;
                             }
-                        }
-                    }).fail(function (jqXHR, textStatus, errorThrown) {
-                        $('.updates').empty().append('<p>Rebooting. Please Wait' + ('.'.repeat(dots)) + '</p>');
-                        if (++dots >= 4) {
-                            dots = 1;
-                        }
-                    });
+                        });
 
-                }, 1000);
+                    }, 1000);
+                });
             });
+
+            confirmModal.modal();
+            confirmModal.modal('show');
         });
     },
 

@@ -1,3 +1,45 @@
-﻿<div class="updates">
-    <p>Applying Updates.. Please Wait</p>
+﻿<!-- Confirm Modal -->
+<div class="modal" id="modUpdateConfirm" tabindex="-1" role="dialog" aria-labelledby="modUpdateConfirmTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modUpdateConfirmTitle">Apply Updates.</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you would like to apply updates now? The device will reboot once update is complete.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnCancelUpdates">Close</button>
+                <button type="button" class="btn btn-primary" id="btnApplyUpdates">Apply Updates</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Modal -->
+<div class="modal" id="modUpdateProgress" tabindex="-1" role="dialog" aria-labelledby="modUpdateProgressTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modUpdateProgressTitle">Please Wait.</h5>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Updating...</span>
+                            </div>
+                        </div>
+                        <div class="col-md-10 updates">
+                            <p>Applying Updates.. Please Wait</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

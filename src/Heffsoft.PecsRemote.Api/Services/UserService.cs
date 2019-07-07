@@ -133,7 +133,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                 HashedPassword = hashedPassword
             };
 
-            user.Id = userRepo.Insert(user);
+            user.Id = userRepo.Insert<Int32>(user);
         }
 
         public User GetUser(String username)

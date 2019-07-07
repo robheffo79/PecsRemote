@@ -1,5 +1,6 @@
 ﻿body {
     background: #3076bc;
+    background-image: url('../images/bgtile-256.png');
     margin: 1em;
 }
 
@@ -17,8 +18,36 @@ footer {
 .login-form {
     border: 1px solid #59606d;
     border-radius: 0.5em;
-    background-color: white;
+    background-color: #fff;
     padding: 1em;
+}
+
+.media-item {
+    width: 260px;
+}
+
+.media-item-thumb a {
+    position: relative;
+    width: 100%;
+}
+
+.media-item-thumb-duration {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: #fff;
+    background: #000;
+    background: rgba(0,0,0,0.7);
+}
+
+.media-player-details-views {
+    text-wrap: none;
+    font: bold;
+}
+
+.media-player-inner video {
+    width: 100%;
+    height: auto;
 }
 
 .login-form > div > img {
@@ -66,6 +95,14 @@ footer {
     .loader:after {
         left: 3.5em;
     }
+
+.media-player-container {
+    background-color: #fff;
+}
+
+.media-items-container {
+    background-color: #fff;
+}
 
 @-webkit-keyframes load7 {
     0%, 80%, 100% {

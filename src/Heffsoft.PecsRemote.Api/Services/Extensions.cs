@@ -25,6 +25,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                            .AddTransient<IEventLogService, EventLogService>()
                            .AddTransient<IUserService, UserService>()
                            .AddTransient<IHostService, HostService>()
+                           .AddTransient<IContentService, ContentService>()
                            .AddTransient<IMediaService, MediaService>();
         }
 

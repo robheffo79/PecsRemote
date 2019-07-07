@@ -1,7 +1,9 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
+﻿using FFMpegCore;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using Heffsoft.PecsRemote.Api.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using YoutubeExplode;
@@ -11,13 +13,17 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class MediaService : IMediaService
     {
+        private const Double DEFAULT_THUMBNAIL_OFFSET = 0.125D;
+
         private readonly IUserService userService;
+        private readonly IContentService contentService;
         private readonly IDataContext dataContext;
         private readonly IDataRepository<Media> mediaRepo;
 
-        public MediaService(IUserService userService, IDataContext dataContext)
+        public MediaService(IUserService userService, IContentService contentService, IDataContext dataContext)
         {
             this.userService = userService;
+            this.contentService = contentService;
             this.dataContext = dataContext;
 
             this.mediaRepo = this.dataContext.GetRepository<Media>();
@@ -41,14 +47,14 @@ namespace Heffsoft.PecsRemote.Api.Services
                 Url = url.ToString(),
                 Enabled = true,
                 Created = DateTime.UtcNow,
-                FilePath = null,
+                File = Guid.Empty,
                 Duration = GetDuration(url),
                 CreatedByUserId = userService.CurrentUser?.Id ?? -1,
                 LastUpdated = DateTime.UtcNow,
                 LastUpdatedByUserId = userService.CurrentUser?.Id ?? -1
             };
 
-            media.Id = mediaRepo.Insert(media);
+            media.Id = mediaRepo.Insert<Int32>(media);
             return media;
         }
 
@@ -67,15 +73,14 @@ namespace Heffsoft.PecsRemote.Api.Services
                 Url = null,
                 Enabled = false,
                 Created = DateTime.UtcNow,
-                FilePath = null,
+                File = Guid.Empty,
                 Duration = TimeSpan.Zero,
                 CreatedByUserId = userService.CurrentUser?.Id ?? -1,
                 LastUpdated = DateTime.UtcNow,
                 LastUpdatedByUserId = userService.CurrentUser?.Id ?? -1
             };
 
-            media.Id = mediaRepo.Insert(media);
-
+            media.Id = mediaRepo.Insert<Int32>(media);
             return media;
         }
 
@@ -172,6 +177,94 @@ namespace Heffsoft.PecsRemote.Api.Services
         public IEnumerable<Media> GetMedia()
         {
             return mediaRepo.GetAll();
+        }
+
+        public void GenerateImage(Int32 id)
+        {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id));
+
+            Media media = mediaRepo.Get(id);
+            if (media != null)
+            {
+                media.Image = contentService.GenerateThumbnail(media.File, DEFAULT_THUMBNAIL_OFFSET);
+                mediaRepo.Update(media);
+            }
+        }
+
+        public void GenerateImage(Media media)
+        {
+            if (media == null)
+                throw new ArgumentNullException(nameof(media));
+
+            media.Image = contentService.GenerateThumbnail(media.File, DEFAULT_THUMBNAIL_OFFSET);
+            mediaRepo.Update(media);
+        }
+
+        public void SetImage(Int32 id, Stream image, String mimeType)
+        {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id));
+
+            Media media = mediaRepo.Get(id);
+            if (media != null)
+            {
+                media.Image = contentService.SaveThumbnail(image, mimeType);
+                mediaRepo.Update(media);
+            }
+        }
+
+        public void SetImage(Media media, Stream image, String mimeType)
+        {
+            if (media == null)
+                throw new ArgumentNullException(nameof(media));
+
+            media.Image = contentService.SaveThumbnail(image, mimeType);
+            mediaRepo.Update(media);
+        }
+
+        public void SetContent(Int32 id, Stream content, String mimeType)
+        {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id));
+
+            Media media = mediaRepo.Get(id);
+            if (media != null)
+            {
+                media.Image = contentService.SaveVideo(content, mimeType);
+                mediaRepo.Update(media);
+            }
+        }
+
+        public void SetContent(Media media, Stream content, String mimeType)
+        {
+            if (media == null)
+                throw new ArgumentNullException(nameof(media));
+
+            media.Image = contentService.SaveVideo(content, mimeType);
+            mediaRepo.Update(media);
+        }
+
+        public void IncrementViews(Int32 id)
+        {
+            if (id <= 0)
+                throw new ArgumentOutOfRangeException(nameof(id));
+
+            Media media = mediaRepo.Get(id);
+            if (media != null)
+            {
+                media.ViewCount++;
+                mediaRepo.Update(media);
+            }
+        }
+
+        public void IncrementViews(Media media)
+        {
+            if (media == null)
+                throw new ArgumentNullException(nameof(media));
+
+            media.ViewCount++;
+            mediaRepo.Update(media);
         }
     }
 }

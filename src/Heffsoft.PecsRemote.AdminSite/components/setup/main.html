@@ -1,46 +1,59 @@
-﻿<h2>Host Settings</h2>
-<div class="form-group">
-    <label for="txtHostname">Hostname</label>
-    <input type="text" class="form-control" id="txtHostname" placeholder="Hostname" />
-</div>
+﻿<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <h2>Host Settings</h2>
+            <div class="form-group">
+                <label for="txtHostname">Hostname</label>
+                <input type="text" class="form-control" id="txtHostname" placeholder="Hostname" />
+            </div>
 
-<h2>Wireless Settings</h2>
-<div class="form-group">
-    <label for="txtSsid">Name (SSID)</label>
-    <input type="text" class="form-control" id="txtSsid" placeholder="SSID" autocomplete="new-password" />
-</div>
-<div class="form-group">
-    <label for="txtPassword">Password</label>
-    <input type="password" class="form-control" id="txtPassword" placeholder="Password" autocomplete="new-password" />
-</div>
+            <h2>Wireless Settings</h2>
+            <div class="form-group">
+                <label for="txtSsid">Name (SSID)</label>
+                <input type="text" class="form-control" id="txtSsid" placeholder="SSID" autocomplete="new-password" />
+            </div>
+            <div class="form-group">
+                <label for="txtPassword">Password</label>
+                <input type="password" class="form-control" id="txtPassword" placeholder="Password" autocomplete="new-password" />
+            </div>
+        </div>
 
-<h2>Network Settings</h2>
-<div class="form-group">
-    <label for="chkUseDhcp">DHCP Enabled</label>
-    <input type="checkbox" class="form-control" id="chkUseDhcp" />
-</div>
-<div class="form-group">
-    <label for="txtIpAddress">IPv4 Address</label>
-    <input type="text" class="form-control" id="txtIpAddress" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
-</div>
-<div class="form-group">
-    <label for="txtSubnetMask">Subnet Mask</label>
-    <input type="text" class="form-control" id="txtSubnetMask" minlength="7" maxlength="15" size="15" pattern="^^(((255\.){3}(255|254|252|248|240|224|192|128|0+))|((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\.0+){3}))$" />
-</div>
-<div class="form-group">
-    <label for="txtGatewayAddress">Gateway Address</label>
-    <input type="text" class="form-control" id="txtGatewayAddress" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
-</div>
-<div class="form-group">
-    <label for="txtDnsPrimary">Primary DNS</label>
-    <input type="text" class="form-control" id="txtDnsPrimary" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
-</div>
-<div class="form-group">
-    <label for="txtDnsSecondary">Secondary DNS</label>
-    <input type="text" class="form-control" id="txtDnsSecondary" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
-</div>
+        <div class="col-lg-6">
+            <h2>Network Settings</h2>
+            <div class="form-group">
+                <label for="chkUseDhcp">DHCP Enabled</label>
+                <input type="checkbox" class="form-control" id="chkUseDhcp" />
+            </div>
+            <div class="form-group">
+                <label for="txtIpAddress">IPv4 Address</label>
+                <input type="text" class="form-control" id="txtIpAddress" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+            </div>
+            <div class="form-group">
+                <label for="txtSubnetMask">Subnet Mask</label>
+                <input type="text" class="form-control" id="txtSubnetMask" minlength="7" maxlength="15" size="15" pattern="^^(((255\.){3}(255|254|252|248|240|224|192|128|0+))|((255\.){2}(255|254|252|248|240|224|192|128|0+)\.0)|((255\.)(255|254|252|248|240|224|192|128|0+)(\.0+){2})|((255|254|252|248|240|224|192|128|0+)(\.0+){3}))$" />
+            </div>
+            <div class="form-group">
+                <label for="txtGatewayAddress">Gateway Address</label>
+                <input type="text" class="form-control" id="txtGatewayAddress" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+            </div>
+            <div class="form-group">
+                <label for="txtDnsPrimary">Primary DNS</label>
+                <input type="text" class="form-control" id="txtDnsPrimary" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+            </div>
+            <div class="form-group">
+                <label for="txtDnsSecondary">Secondary DNS</label>
+                <input type="text" class="form-control" id="txtDnsSecondary" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" />
+            </div>
+        </div>
+    </div>
 
-<h2>Save Changes</h2>
-<div class="form-group">
-    <input type="button" class="form-control" id="btnSave" value="Save" />
+    <div class="row">
+        <div class="col-lg-3">
+            <h2>Save Changes</h2>
+            <div class="form-group">
+                <input type="button" class="form-control" id="btnSave" value="Save" />
+            </div>
+        </div>
+        <div class="col-lg-9">&nbsp;</div>
+    </div>
 </div>

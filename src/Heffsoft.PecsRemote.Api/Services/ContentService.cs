@@ -1,7 +1,12 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
+﻿using FFMpegCore;
+using FFMpegCore.FFMPEG;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using Heffsoft.PecsRemote.Api.Models;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,6 +20,14 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private readonly IDataContext dataContext;
         private readonly IDataRepository<Content> contentRepo;
+        private readonly IConfiguration configuration;
+
+        public ContentService(IDataContext dataContext, IConfiguration configuration)
+        {
+            this.dataContext = dataContext;
+            this.contentRepo = dataContext.GetRepository<Content>();
+            this.configuration = configuration;
+        }
 
         public void DeleteThumbnail(Guid thumbnailId)
         {
@@ -157,6 +170,78 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
 
             return "";
+        }
+
+        public Guid GenerateThumbnail(Guid videoId, Double offset)
+        {
+            if (videoId == Guid.Empty)
+                throw new ArgumentOutOfRangeException(nameof(videoId));
+
+            if (offset < 0.00D || offset > 1.00D)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+
+            Content videoContent = contentRepo.Get(videoId);
+            if (videoContent == null)
+                throw new Exception($"Video '{videoId}' not found.");
+
+            FileInfo tempFile = new FileInfo(Path.GetTempFileName());
+            VideoInfo videoInfo = new VideoInfo(videoContent.Filename);
+            TimeSpan imageOffetTimeStamp = new TimeSpan((Int64)(videoInfo.Duration.Ticks * offset));
+
+            FFMpeg processor = new FFMpeg();
+            Bitmap image = processor.Snapshot(videoInfo, tempFile, new System.Drawing.Size(1280, 720), imageOffetTimeStamp, false);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                String mime = null;
+
+                switch (configuration.GetValue<String>("content:thumbnail:format", "jpg").ToLower())
+                {
+                    case "jpg":
+                        mime = "image/jpeg";
+                        ImageCodecInfo jpegEncoder = GetEncoder(ImageFormat.Jpeg);
+                        EncoderParameters parameters = new EncoderParameters(1);
+                        parameters.Param[0] = new EncoderParameter(Encoder.Quality, Math.Clamp((Int64)(100.0D * configuration.GetValue<Double>("content:thumbnail:quality", 0.8D)), 0L, 100L));
+                        image.Save(ms, jpegEncoder, parameters);
+                        break;
+
+                    case "png":
+                        mime = "image/png";
+                        image.Save(ms, ImageFormat.Png);
+                        break;
+
+                    case "bmp":
+                        mime = "image/bmp";
+                        image.Save(ms, ImageFormat.Bmp);
+                        break;
+                }
+
+                ms.Position = 0;
+                return SaveThumbnail(ms, mime);
+            }
+        }
+
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
+
+        public String GetThumbnailUrl(Guid thumbnailId)
+        {
+            return "/images/thumb-missing.png";
+        }
+
+        public String GetVideoUrl(Guid videoId)
+        {
+            return "/videos/video.mp4";
         }
     }
 }

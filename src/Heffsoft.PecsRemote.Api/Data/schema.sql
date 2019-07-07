@@ -38,8 +38,9 @@ CREATE TABLE IF NOT EXISTS `Media` (
 	`Image` CHAR(36) NOT NULL,
 	`File` CHAR(36) NOT NULL,
 	`Url` VARCHAR(2083) NOT NULL,
-	`Duration` BIGINT NOT NULL,
+	`Duration` TIME NOT NULL,
 	`Enabled` BIT NOT NULL,
+	`ViewCount` INT NOT NULL,
 	`Created` DATETIME NOT NULL,
 	`CreatedByUserId` INT NOT NULL,
 	`LastUpdated` DATETIME NOT NULL,
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `Media` (
 
 CREATE TABLE IF NOT EXISTS `Content` (
 	`Id` CHAR(36) NOT NULL,
-	`MimeType` VARCHAR(255)
+	`MimeType` VARCHAR(255),
 	`Filename` VARCHAR(2046) NOT NULL,
 	`Size` BIGINT NOT NULL,
 	PRIMARY KEY(`Id`)

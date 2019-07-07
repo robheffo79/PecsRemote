@@ -25,7 +25,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             {
                 lock (eventLogRepo)
                 {
-                    eventLogRepo.Insert(new EventLog()
+                    eventLogRepo.Insert<Int32>(new EventLog()
                     {
                         Id = 0,
                         Timestamp = DateTime.Now,
@@ -43,7 +43,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             {
                 lock (eventLogRepo)
                 {
-                    eventLogRepo.Insert(new EventLog()
+                    eventLogRepo.Insert<Int32>(new EventLog()
                     {
                         Id = 0,
                         Timestamp = DateTime.Now,
@@ -63,7 +63,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
                 lock (eventLogRepo)
                 {
-                    eventLogRepo.Insert(new EventLog()
+                    eventLogRepo.Insert<Int32>(new EventLog()
                     {
                         Id = 0,
                         Timestamp = DateTime.Now,

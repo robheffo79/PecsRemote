@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using YoutubeExplode;
 using YoutubeExplode.Models.MediaStreams;
+using Heffsoft.PecsRemote.Api.Services;
+using YoutubeExplode.Models;
 
 namespace Heffsoft.PecsRemote.Api.Controllers
 {
@@ -18,15 +20,47 @@ namespace Heffsoft.PecsRemote.Api.Controllers
     {
         private readonly IEventLogService eventLogService;
         private readonly IMediaService mediaService;
+        private readonly IContentService contentService;
 
-        public MediaController(IEventLogService eventLogService, IMediaService mediaService)
+        public MediaController(IEventLogService eventLogService, IMediaService mediaService, IContentService contentService)
         {
             this.eventLogService = eventLogService;
             this.mediaService = mediaService;
+            this.contentService = contentService;
+        }
+
+        [HttpGet, Route("")]
+        public IActionResult GetMedia()
+        {
+
+            return Ok(mediaService.GetMedia().Select(m => new
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Url = contentService.GetVideoUrl(m.File),
+                Thumbnail = contentService.GetThumbnailUrl(m.Image),
+                Duration = FormatDuration(m.Duration),
+                ViewCount = m.ViewCount
+            }));
+        }
+
+        private String FormatDuration(TimeSpan duration)
+        {
+            if(duration.TotalDays > 1.00D)
+            {
+                return duration.ToString("d\\.hh\\:mm\\:ss");
+            }
+
+            if(duration.TotalHours > 1.00D)
+            {
+                return duration.ToString("hh\\:mm\\:ss");
+            }
+
+            return duration.ToString("mm\\:ss");
         }
 
         [HttpGet, Route("{id:int}")]
-        public IActionResult Play(Int32 id)
+        public IActionResult Play(Int32 id, Boolean inc = true)
         {
             Media media = mediaService.GetMedia(id);
             if (media != null)
@@ -42,6 +76,11 @@ namespace Heffsoft.PecsRemote.Api.Controllers
                     }
                 }
 
+                if (inc)
+                {
+                    mediaService.IncrementViews(id);
+                }
+
                 eventLogService.Log("Media", $"Redirecting client to media url", redirectTo);
                 return Redirect(redirectTo);
             }
@@ -53,7 +92,26 @@ namespace Heffsoft.PecsRemote.Api.Controllers
         [HttpPost]
         public IActionResult Create([FromBody]MediaCreation media)
         {
-            mediaService.AddMedia()
+            //mediaService.AddMedia()
+
+            return Ok();
+        }
+
+        [HttpGet, Route("suggest")]
+        public IActionResult SuggestTitle(String q)
+        {
+            if(Uri.TryCreate(q, UriKind.Absolute, out Uri url))
+            {
+                if(url.IsYouTubeUrl())
+                {
+                    String id = YoutubeClient.ParseVideoId(url.ToString());
+                    YoutubeClient client = new YoutubeClient();
+                    Video video = client.GetVideoAsync(id).Result;
+                    return Ok(new { title = video.Title });
+                }
+            }
+
+            return NoContent();
         }
 
         private Boolean IsYouTubeUrl(String url)

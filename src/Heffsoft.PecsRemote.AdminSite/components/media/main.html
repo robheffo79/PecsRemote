@@ -1,0 +1,84 @@
+﻿<div class="container media-player-container">
+    <div id="pnlMediaPlayer" class="d-flex flex-wrap">
+        <p>Player Goes Here.</p>
+    </div>
+</div>
+
+<div class="container media-items-container">
+    <div id="pnlMediaItems" class="d-flex flex-wrap">
+        <p>No Media Found.</p>
+    </div>
+</div>
+
+<div class="container">
+    <button type="button" class="btn btn-primary" id="btnAddMedia">Add Media</button>
+</div>
+
+<script id="tplMediaItem" type="text/x-handlebars-template">
+    <div class="media-item" data-media-id="{{id}}">
+        <div class="media-item-thumb">
+            <a class="media-link" href="#" aria-hidden="true" id="lnkMediaThumb{{id}}">
+                <img id="imgMediaThumb{{id}}" width="210" alt="{{name}}" src="{{thumbnail}}" />
+                <div class="media-item-thumb-duration">
+                    <span id="lblMediaThumbDuration">{{duration}}</span>
+                </div>
+            </a>
+        </div>
+        <div class="media-item-details">
+            <h3>
+                <a class="media-link" href="#" aria-hidden="true" id="lnkMediaDetails{{id}}">
+                    {{name}}
+                </a>
+            </h3>
+        </div>
+    </div>
+</script>
+
+<script id="tplMediaPlayer" type="text/x-handlebars-template">
+    <div class="media-player" data-media-id="{{id}}">
+        <div class="media-player-inner">
+            <video id="vidMediaPlayer{{id}}" controls poster="{{thumbnail}}">
+                <source src="{{url}}" type="{{mimeType}}" />
+                Your browser does not support HTML5 Video.
+            </video>
+        </div>
+        <div class="media-player-details d-flex">
+            <input class="media-player-details-name flex-grow-1" type="text" id="txtMediaName{{id}}" value="{{name}}" placeholder="Title" />
+            <span class="media-player-details-views">{{viewCount}} views</span>
+        </div>
+    </div>
+</script>
+
+<!-- Add Modal -->
+<div class="modal" id="modAddMedia" tabindex="-1" role="dialog" aria-labelledby="modAddNewTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modAddNewTitle">Add New Media.</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <div class="row">
+                        <input type="file" id="uplFile" />
+                        <label for="uplFile"><strong>Choose a file</strong><span class="upload-drop-target"> or drag it here</span>.</label>
+                    </div>
+                    <div class="row">
+                        <label for="txtUrl">Or enter a URL</label>
+                        <input type="url" placeholder="https://www.somesite.com" pattern="https?://.+" id="txtUrl" />
+                    </div>
+                    <div class="row">
+                        <label for="txtTitle">Title</label>
+                        <input type="text" placeholder="Enter Title" id="txtTitle" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnUploadVideo">Add Media</button>
+            </div>
+        </div>
+    </div>
+</div>
