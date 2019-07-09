@@ -23,6 +23,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
             return services.AddTransient<IRandomService, RandomService>()
                            .AddTransient<IEventLogService, EventLogService>()
+                           .AddTransient<INotificationService, NotificationService>()
                            .AddTransient<IUserService, UserService>()
                            .AddTransient<IHostService, HostService>()
                            .AddTransient<IContentService, ContentService>()
@@ -195,6 +196,14 @@ namespace Heffsoft.PecsRemote.Api.Services
 
                     return new Guid(guid);
                 }
+            }
+        }
+
+        public static void ForEach<T>(this IEnumerable<T> enumeration, Action<T> action)
+        {
+            foreach (T item in enumeration)
+            {
+                action(item);
             }
         }
     }

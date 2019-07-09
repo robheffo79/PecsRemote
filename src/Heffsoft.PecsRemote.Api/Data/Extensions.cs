@@ -44,11 +44,22 @@ namespace Heffsoft.PecsRemote.Api.Data
             }
         }
 
-        public static String GetInsertQuery(this Type type)
+        public static String GetInsertQuery<U>(this Type type)
         {
             String tableName = type.GetTableName();
-            String[] columnNames = type.GetTableColumnNames().Where(n => n != "Id").ToArray();
-            String[] propertyNames = type.GetPropertyNames().Where(n => n != "Id").ToArray();
+            String[] columnNames = null;
+            String[] propertyNames = null;
+
+            if (typeof(U) == typeof(Guid))
+            {
+                columnNames = type.GetTableColumnNames().ToArray();
+                propertyNames = type.GetPropertyNames().ToArray();
+            }
+            else
+            {
+                columnNames = type.GetTableColumnNames().Where(n => n != "Id").ToArray();
+                propertyNames = type.GetPropertyNames().Where(n => n != "Id").ToArray();
+            }
 
             return $"INSERT INTO `{tableName}` ({String.Join(", ", columnNames.Select(c => $"`{c}`"))}) VALUES({String.Join(", ", propertyNames.Select(p => $"@{p}"))}); SELECT LAST_INSERT_ID();";
         }

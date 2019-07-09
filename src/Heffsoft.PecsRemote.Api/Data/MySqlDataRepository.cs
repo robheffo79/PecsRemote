@@ -50,7 +50,7 @@ namespace Heffsoft.PecsRemote.Api.Data
 
         public U Insert<U>(T obj)
         {
-            String query = typeof(T).GetInsertQuery();
+            String query = typeof(T).GetInsertQuery<U>();
             return context.Connection.ExecuteScalar<U>(query, obj, context.Transaction);
         }
 

@@ -107,9 +107,12 @@
             $.ajax({ url: 'components/header.html', crossDomain: true }),
             $.ajax({ url: 'components/main.html', crossDomain: true }),
             $.ajax({ url: 'components/footer.html', crossDomain: true }),
+            $.ajax({ url: 'components/modals.html', crossDomain: true }),
             $.ajax({ url: 'api/system/updates', crossDomain: true}),
-        ).done(function (header, main, footer, updates) {
+        ).done(function (header, main, footer, modals, updates) {
             $('.main-container').append(header[0]).append(main[0]).append(footer[0]);
+            $('.modal-container').append(modals[0]);
+
             $('#btnTitle').on('click', function () { adminApp.home(); });
             $('#btnHome').on('click', function () { adminApp.home(); });
             $('#btnMedia').on('click', function () { adminApp.media(); });
