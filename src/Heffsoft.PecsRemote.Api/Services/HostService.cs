@@ -34,6 +34,10 @@ namespace Heffsoft.PecsRemote.Api.Services
         private const String BPP_NODE = "bits_per_pixel";
         private const String FRAMEBUFFER_NODES = "fb";
         private const String UPTIME_FILE = "/proc/uptime";
+        private const String BLACKLIST_CMD = "/sbin/iptables -A INPUT -s {ip} -j DROP";
+        private const String BLACKLIST6_CMD = "/sbin/ip6tables -A INPUT -s {ip} -j DROP";
+        private const String UNBLACKLIST_CMD = "/sbin/iptables -D INPUT -s {ip} -j DROP";
+        private const String UNBLACKLIST6_CMD = "/sbin/ip6tables -D INPUT -s {ip} -j DROP";
 
         public String Hostname => File.ReadAllText(HOSTNAME_FILE);
 
@@ -376,6 +380,46 @@ namespace Heffsoft.PecsRemote.Api.Services
                 String cmd = "apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y autoremove && fstrim / && reboot";
                 ForkBash(cmd);
             });
+        }
+
+        public Task BlacklistIP(IPAddress ip)
+        {
+            String cmd = null;
+
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                cmd = BLACKLIST_CMD.Replace("{ip}", ip.ToString());
+            }
+
+            if (ip.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                cmd = BLACKLIST6_CMD.Replace("{ip}", ip.ToString());
+            }
+
+            if (cmd != null)
+                return Task.CompletedTask;
+
+            return RunBashAsync(cmd, false);
+        }
+
+        public Task UnBlacklistIP(IPAddress ip)
+        {
+            String cmd = null;
+
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                cmd = UNBLACKLIST_CMD.Replace("{ip}", ip.ToString());
+            }
+
+            if (ip.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                cmd = UNBLACKLIST6_CMD.Replace("{ip}", ip.ToString());
+            }
+
+            if (cmd != null)
+                return Task.CompletedTask;
+
+            return RunBashAsync(cmd, false);
         }
     }
 }

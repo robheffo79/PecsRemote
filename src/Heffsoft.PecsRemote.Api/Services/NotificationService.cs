@@ -9,7 +9,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class NotificationService : INotificationService
     {
-        private const Int32 MAX_NOTIFICATIONS = 200;
+        private const Int32 MAX_NOTIFICATIONS = 1024;
 
         private readonly IDataContext dataContext;
         private readonly IDataRepository<Notification> notificationRepo;
@@ -32,6 +32,20 @@ namespace Heffsoft.PecsRemote.Api.Services
                 notification.Id = Guid.NewGuid();
 
             notificationRepo.Insert<Guid>(notification);
+        }
+
+        public void AddNotification(NotificationType type, String title, String content, String image)
+        {
+            AddNotification(new Notification()
+            {
+                Id = Guid.Empty,
+                Timestamp = DateTime.Now,
+                Type = type,
+                Title = title,
+                Content = content,
+                Image = image,
+                Read = false
+            });
         }
 
         public void DeleteNotification(Notification notification)
@@ -61,6 +75,11 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
 
             return notifications;
+        }
+
+        public IEnumerable<Notification> GetNotifications(Int32 page, Int32 pageSize)
+        {
+            return GetNotifications().Skip(page * pageSize).Take(pageSize);
         }
 
         public void MarkAllAsRead()

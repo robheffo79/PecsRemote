@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -205,6 +206,15 @@ namespace Heffsoft.PecsRemote.Api.Services
             {
                 action(item);
             }
+        }
+
+        public static Guid ToGuid(this IPAddress ip)
+        {
+            if (ip == null)
+                throw new ArgumentNullException(nameof(ip));
+
+            Byte[] bytes = ip.MapToIPv6().GetAddressBytes();
+            return new Guid(bytes);
         }
     }
 }
