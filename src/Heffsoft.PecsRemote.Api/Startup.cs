@@ -54,51 +54,56 @@ namespace Heffsoft.PecsRemote.Api
 
             app.UseForwardedHeaders();
 
+            if (env.IsDevelopment()) { app.UseDeveloperExceptionPage(); }
+
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
             app.UseAuthentication();
             app.UseMvc();
         }
 
         private void OnAppStopped()
         {
-            INotificationService notificationService = ServiceProvider.GetService<INotificationService>();
-
-            notificationService.AddNotification(new Notification()
-            {
-                Id = Guid.Empty,
-                Type = NotificationType.System,
-                Timestamp = DateTime.UtcNow,
-                Title = "PECSRemote Stopped",
-                Image = "/images/stopped.png",
-                Content = "The PECSRemote platform has stopped.",
-                Read = false
-            });
         }
 
         private void OnAppStopping()
         {
+            //INotificationService notificationService = ServiceProvider.GetService<INotificationService>();
+
+            //notificationService.AddNotification(new Notification()
+            //{
+            //    Id = Guid.Empty,
+            //    Type = NotificationType.System,
+            //    Timestamp = DateTime.UtcNow,
+            //    Title = "PECSRemote Stopped",
+            //    Image = "/images/stopped.png",
+            //    Content = "The PECSRemote platform has stopped.",
+            //    Read = false
+            //});
         }
 
         private void OnAppStarted()
         {
-            INotificationService notificationService = ServiceProvider.GetService<INotificationService>();
+            //Task.Run(async () =>
+            //{
+            //    INotificationService notificationService = ServiceProvider.GetService<INotificationService>();
 
-            notificationService.AddNotification(new Notification()
-            {
-                Id = Guid.Empty,
-                Type = NotificationType.System,
-                Timestamp = DateTime.UtcNow,
-                Title = "PECSRemote Started",
-                Image = "/images/started.png",
-                Content = "The PECSRemote platform has started.",
-                Read = false
-            });
+            //    while(notificationService == null)
+            //    {
+            //        await Task.Delay(100);
+            //        notificationService = ServiceProvider.GetService<INotificationService>();
+            //    }
+
+            //    notificationService.AddNotification(new Notification()
+            //    {
+            //        Id = Guid.Empty,
+            //        Type = NotificationType.System,
+            //        Timestamp = DateTime.UtcNow,
+            //        Title = "PECSRemote Started",
+            //        Image = "/images/started.png",
+            //        Content = "The PECSRemote platform has started.",
+            //        Read = false
+            //    });
+            //});
         }
     }
 }

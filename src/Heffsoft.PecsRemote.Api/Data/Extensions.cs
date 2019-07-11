@@ -3,8 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Data
@@ -71,7 +73,7 @@ namespace Heffsoft.PecsRemote.Api.Data
             String[] propertyNames = type.GetPropertyNames().Where(n => n != "Id").ToArray();
             String[] args = new String[columnNames.Length];
 
-            for(Int32 i = 0; i < columnNames.Length; i++)
+            for (Int32 i = 0; i < columnNames.Length; i++)
             {
                 args[i] = $"`{columnNames[i]}` = @{propertyNames[i]}";
             }
@@ -82,6 +84,54 @@ namespace Heffsoft.PecsRemote.Api.Data
         public static IServiceCollection AddDataContext(this IServiceCollection services)
         {
             return services.AddTransient<IDataContext, MySqlDataContext>();
+        }
+
+        public static IEnumerable<String> GetAllSqlScripts(this Assembly assembly, String @namespace)
+        {
+            return assembly.GetManifestResourceNames()
+                           .Where(r => r.StartsWith(@namespace) && r.EndsWith(".sql"))
+                           .Select(r => r.Substring(@namespace.Length + 1))
+                           .OrderBy(r => r);
+        }
+
+        private static Char[] quotes = { '`', '\'', '"' };
+        public static IEnumerable<String> SplitSql(this String sql)
+        {
+            StringBuilder query = new StringBuilder();
+
+            Char? currentQuote = null;
+            foreach(Char c in sql)
+            {
+                if(quotes.Contains(c))
+                {
+                    if (currentQuote == null)
+                    {
+                        currentQuote = c;
+                        query.Append(c);
+                    }
+                    else if(currentQuote.Value == c)
+                    {
+                        currentQuote = null;
+                        query.Append(c);
+                    }
+                }
+                else if(c == ';' && currentQuote == null)
+                {
+                    query.Append(c);
+                    yield return query.ToString().Trim();
+                    query = new StringBuilder();
+                }
+                else
+                {
+                    query.Append(c);
+                }
+            }
+
+            String leftover = query.ToString().Trim();
+            if(String.IsNullOrWhiteSpace(leftover) == false)
+            {
+                yield return leftover;
+            }
         }
     }
 }

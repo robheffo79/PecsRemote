@@ -1,10 +1,14 @@
 ﻿using Heffsoft.PecsRemote.Api.Interfaces;
+using Heffsoft.PecsRemote.Api.Models;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Dapper;
 
 namespace Heffsoft.PecsRemote.Api.Data
 {
@@ -13,6 +17,9 @@ namespace Heffsoft.PecsRemote.Api.Data
         internal readonly MySqlConnection Connection;
         internal MySqlTransaction Transaction;
 
+        private static Boolean databaseInitialised = false;
+        private static Object initialisationLock = new Object();
+
         public MySqlDataContext(IConfiguration configuration)
         {
             String connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -20,6 +27,68 @@ namespace Heffsoft.PecsRemote.Api.Data
                 throw new InvalidOperationException("Connection String 'DefaultConnection' is not defined or is empty.");
 
             Connection = new MySqlConnection(connectionString);
+
+            lock(initialisationLock)
+            {
+                if(databaseInitialised == false)
+                {
+                    InitialiseDatabase();
+                    databaseInitialised = true;
+                }
+            }
+        }
+
+        private void InitialiseDatabase()
+        {
+            String @namespace = "Heffsoft.PecsRemote.Api.Data.Schema";
+            Version dbVersion = GetDatabaseVersion();
+            Assembly currentAssembly = Assembly.GetExecutingAssembly();
+
+            foreach(String script in FilterVersion(currentAssembly.GetAllSqlScripts(@namespace), dbVersion))
+            {
+                using(Stream scriptStream = currentAssembly.GetManifestResourceStream($"{@namespace}.{@script}"))
+                {
+                    using(TextReader reader = new StreamReader(scriptStream))
+                    {
+                        String content = reader.ReadToEnd();
+                        foreach (String query in content.SplitSql())
+                        {
+                            Connection.ExecuteScalar(query);
+                        }
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<String> FilterVersion(IEnumerable<String> scripts, Version dbVersion)
+        {
+            foreach(String script in scripts)
+            {
+                String versionString = script.Substring(0, script.Length - 4);
+                Version scriptVersion = Version.Parse(versionString);
+                if(scriptVersion > dbVersion)
+                {
+                    yield return script;
+                }
+            }
+        }
+
+        private Version GetDatabaseVersion()
+        {
+            try
+            {
+                IDataRepository<Setting> settingsRepo = GetRepository<Setting>();
+                Setting setting = settingsRepo.Find("`Key` = @Key", new { Key = "database:version" }).SingleOrDefault();
+                if(setting != null)
+                {
+                    return Version.Parse(setting.Value);
+                }
+            }
+            catch
+            {
+            }
+
+            return new Version("0.0.0");
         }
 
         public void BeginTransaction()
