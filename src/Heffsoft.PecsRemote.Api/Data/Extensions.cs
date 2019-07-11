@@ -99,6 +99,7 @@ namespace Heffsoft.PecsRemote.Api.Data
         {
             StringBuilder query = new StringBuilder();
 
+            Char lastChar = ' ';
             Char? currentQuote = null;
             foreach(Char c in sql)
             {
@@ -106,12 +107,19 @@ namespace Heffsoft.PecsRemote.Api.Data
                 {
                     if (currentQuote == null)
                     {
-                        currentQuote = c;
+                        if (lastChar != '\\')
+                        {
+                            currentQuote = c;
+                        }
                         query.Append(c);
                     }
                     else if(currentQuote.Value == c)
                     {
-                        currentQuote = null;
+                        if (lastChar != '\\')
+                        {
+                            currentQuote = null;
+                        }
+
                         query.Append(c);
                     }
                 }
@@ -125,6 +133,8 @@ namespace Heffsoft.PecsRemote.Api.Data
                 {
                     query.Append(c);
                 }
+
+                lastChar = c;
             }
 
             String leftover = query.ToString().Trim();
