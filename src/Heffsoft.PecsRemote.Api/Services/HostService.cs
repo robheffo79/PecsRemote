@@ -8,13 +8,12 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Net;
-using System.Net.Sockets;
-using System.Net.PeerToPeer;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -48,9 +47,9 @@ namespace Heffsoft.PecsRemote.Api.Services
             get
             {
                 String cpuInfo = File.ReadAllText(CPUINFO_FILE);
-                foreach(String line in cpuInfo.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
+                foreach (String line in cpuInfo.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
                 {
-                    if(line.StartsWith("Serial"))
+                    if (line.StartsWith("Serial"))
                     {
                         return line.Split(';').Last().Trim();
                     }
@@ -103,7 +102,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             foreach (String line in scanOutput.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
             {
                 Match match = ssid.Match(line);
-                if(match.Success)
+                if (match.Success)
                 {
                     ssidList.Add(match.Groups["ssid"].Value);
                 }
@@ -157,7 +156,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private static PixelFormat TranslatePixelFormat(Int32 bpp)
         {
-            switch(bpp)
+            switch (bpp)
             {
                 case 15:
                     return PixelFormat.Format16bppRgb555;
@@ -294,7 +293,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             IEnumerable<String> lines = (await File.ReadAllLinesAsync(INTERFACES_FILE)).Select(l => l.ToLowerInvariant());
 
             Boolean inSection = false;
-            foreach(String line in lines)
+            foreach (String line in lines)
             {
                 String trimmed = line.Trim();
 
@@ -354,7 +353,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private String Dequote(String text)
         {
-            if(text.StartsWith("\"") && text.EndsWith("\""))
+            if (text.StartsWith("\"") && text.EndsWith("\""))
             {
                 return text.Substring(1, text.Length - 2).Replace("\\\"", "\"");
             }

@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
 using Heffsoft.PecsRemote.Api.Interfaces;
 using Heffsoft.PecsRemote.Api.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using YoutubeExplode;
-using YoutubeExplode.Models.MediaStreams;
 using Heffsoft.PecsRemote.Api.Services;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
+using System.Text.RegularExpressions;
+using YoutubeExplode;
 using YoutubeExplode.Models;
+using YoutubeExplode.Models.MediaStreams;
 
 namespace Heffsoft.PecsRemote.Api.Controllers
 {
@@ -46,12 +44,12 @@ namespace Heffsoft.PecsRemote.Api.Controllers
 
         private String FormatDuration(TimeSpan duration)
         {
-            if(duration.TotalDays > 1.00D)
+            if (duration.TotalDays > 1.00D)
             {
                 return duration.ToString("d\\.hh\\:mm\\:ss");
             }
 
-            if(duration.TotalHours > 1.00D)
+            if (duration.TotalHours > 1.00D)
             {
                 return duration.ToString("hh\\:mm\\:ss");
             }
@@ -100,9 +98,9 @@ namespace Heffsoft.PecsRemote.Api.Controllers
         [HttpGet, Route("suggest")]
         public IActionResult SuggestTitle(String q)
         {
-            if(Uri.TryCreate(q, UriKind.Absolute, out Uri url))
+            if (Uri.TryCreate(q, UriKind.Absolute, out Uri url))
             {
-                if(url.IsYouTubeUrl())
+                if (url.IsYouTubeUrl())
                 {
                     String id = YoutubeClient.ParseVideoId(url.ToString());
                     YoutubeClient client = new YoutubeClient();

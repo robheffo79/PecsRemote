@@ -24,7 +24,7 @@ namespace Heffsoft.PecsRemote.Api.Controllers
         [HttpPost, Route("authenticate")]
         public IActionResult Authenticate([FromBody]AuthenticationRequest authenticationRequest)
         {
-            if(String.IsNullOrWhiteSpace(authenticationRequest.Username) || String.IsNullOrWhiteSpace(authenticationRequest.Password))
+            if (String.IsNullOrWhiteSpace(authenticationRequest.Username) || String.IsNullOrWhiteSpace(authenticationRequest.Password))
                 return BadRequest();
 
             String token = userService.AuthenticateUser(authenticationRequest.Username,

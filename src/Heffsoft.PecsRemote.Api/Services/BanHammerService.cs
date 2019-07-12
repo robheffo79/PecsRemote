@@ -1,14 +1,13 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Heffsoft.PecsRemote.Api.Models;
-using System.Net;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -44,7 +43,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             IDataContext dataContext = serviceProvider.GetService<IDataContext>();
             IDataRepository<BannedAddress> bannedAddressRepo = dataContext.GetRepository<BannedAddress>();
 
-            foreach(BannedAddress ban in bannedAddressRepo.GetAll().Where(b => b.UnbanAt.HasValue && b.UnbanAt.Value <= DateTime.Now).ToArray())
+            foreach (BannedAddress ban in bannedAddressRepo.GetAll().Where(b => b.UnbanAt.HasValue && b.UnbanAt.Value <= DateTime.Now).ToArray())
             {
                 try
                 {

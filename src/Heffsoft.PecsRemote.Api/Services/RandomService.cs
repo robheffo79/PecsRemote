@@ -1,8 +1,5 @@
 ﻿using Heffsoft.PecsRemote.Api.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -14,7 +11,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public RandomService()
         {
-            lock(seedRandom)
+            lock (seedRandom)
             {
                 instanceRandom = new Random(seedRandom.Next());
             }

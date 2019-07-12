@@ -1,9 +1,7 @@
-﻿using Heffsoft.PecsRemote.Api.Models;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Interfaces
 {

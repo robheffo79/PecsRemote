@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Heffsoft.PecsRemote.Api.Models
+namespace Heffsoft.PecsRemote.Api.Data.Models
 {
     [Table("EventLog")]
     public class EventLog

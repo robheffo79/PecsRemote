@@ -1,11 +1,8 @@
-﻿using FFMpegCore;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
 using Heffsoft.PecsRemote.Api.Interfaces;
-using Heffsoft.PecsRemote.Api.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using YoutubeExplode;
 using YoutubeExplode.Models;
 
@@ -86,7 +83,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private TimeSpan GetDuration(Uri url)
         {
-            if(url.IsYouTubeUrl())
+            if (url.IsYouTubeUrl())
             {
                 String id = YoutubeClient.ParseVideoId(url.ToString());
                 YoutubeClient client = new YoutubeClient();

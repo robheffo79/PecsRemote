@@ -1,5 +1,6 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
-using Heffsoft.PecsRemote.Api.Models;
+﻿using Dapper;
+using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
@@ -7,8 +8,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
-using Dapper;
 
 namespace Heffsoft.PecsRemote.Api.Data
 {
@@ -28,9 +27,9 @@ namespace Heffsoft.PecsRemote.Api.Data
 
             Connection = new MySqlConnection(connectionString);
 
-            lock(initialisationLock)
+            lock (initialisationLock)
             {
-                if(databaseInitialised == false)
+                if (databaseInitialised == false)
                 {
                     InitialiseDatabase();
                     databaseInitialised = true;
@@ -44,11 +43,11 @@ namespace Heffsoft.PecsRemote.Api.Data
             Version dbVersion = GetDatabaseVersion();
             Assembly currentAssembly = Assembly.GetExecutingAssembly();
 
-            foreach(String script in FilterVersion(currentAssembly.GetAllSqlScripts(@namespace), dbVersion))
+            foreach (String script in FilterVersion(currentAssembly.GetAllSqlScripts(@namespace), dbVersion))
             {
-                using(Stream scriptStream = currentAssembly.GetManifestResourceStream($"{@namespace}.{@script}"))
+                using (Stream scriptStream = currentAssembly.GetManifestResourceStream($"{@namespace}.{@script}"))
                 {
-                    using(TextReader reader = new StreamReader(scriptStream))
+                    using (TextReader reader = new StreamReader(scriptStream))
                     {
                         String content = reader.ReadToEnd();
                         foreach (String query in content.SplitSql())
@@ -62,11 +61,11 @@ namespace Heffsoft.PecsRemote.Api.Data
 
         private IEnumerable<String> FilterVersion(IEnumerable<String> scripts, Version dbVersion)
         {
-            foreach(String script in scripts)
+            foreach (String script in scripts)
             {
                 String versionString = script.Substring(0, script.Length - 4);
                 Version scriptVersion = Version.Parse(versionString);
-                if(scriptVersion > dbVersion)
+                if (scriptVersion > dbVersion)
                 {
                     yield return script;
                 }
@@ -79,7 +78,7 @@ namespace Heffsoft.PecsRemote.Api.Data
             {
                 IDataRepository<Setting> settingsRepo = GetRepository<Setting>();
                 Setting setting = settingsRepo.Find("`Key` = @Key", new { Key = "database:version" }).SingleOrDefault();
-                if(setting != null)
+                if (setting != null)
                 {
                     return Version.Parse(setting.Value);
                 }

@@ -1,15 +1,12 @@
 ﻿using FFMpegCore;
 using FFMpegCore.FFMPEG;
+using Heffsoft.PecsRemote.Api.Data.Models;
 using Heffsoft.PecsRemote.Api.Interfaces;
-using Heffsoft.PecsRemote.Api.Models;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -82,7 +79,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private String ExtensionForMime(String mimeType)
         {
-            switch(mimeType.Trim().ToLower())
+            switch (mimeType.Trim().ToLower())
             {
                 case "audio/aac":
                     return ".aac";

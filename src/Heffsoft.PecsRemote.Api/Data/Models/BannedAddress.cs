@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Heffsoft.PecsRemote.Api.Models
+namespace Heffsoft.PecsRemote.Api.Data.Models
 {
     [Table("BannedAddresses")]
     public class BannedAddress

@@ -1,4 +1,5 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using Heffsoft.PecsRemote.Api.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +12,6 @@ using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -126,13 +126,13 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private void CheckBan(IPAddress clientIP)
         {
-            lock(failedAttempts)
+            lock (failedAttempts)
             {
                 failedAttempts.Add(new FailedAttempt() { ClientIP = clientIP, Timestamp = DateTime.Now });
                 failedAttempts.RemoveAll(a => (DateTime.Now - a.Timestamp).TotalSeconds > FAILED_ATTEMPT_WINDOW_SECONDS);
 
                 IEnumerable<FailedAttempt> forClient = failedAttempts.Where(a => a.ClientIP == clientIP);
-                if(forClient.Count() > FAILED_ATTEMPT_LIMIT)
+                if (forClient.Count() > FAILED_ATTEMPT_LIMIT)
                 {
                     Ban(clientIP);
                 }
@@ -148,7 +148,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             Guid id = clientIP.ToGuid();
             BannedAddress banned = bannedAddressRepo.Get(id);
 
-            if(banned != null)
+            if (banned != null)
             {
                 banned.BanCount++;
                 banned.LastBanned = DateTime.Now;

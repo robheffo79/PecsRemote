@@ -7,12 +7,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -57,7 +55,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public static String Hash(this String value, String salt)
         {
-            using(SHA256 sha = new SHA256Managed())
+            using (SHA256 sha = new SHA256Managed())
             {
                 Byte[] bytes = Encoding.UTF8.GetBytes($"{salt}{value}");
                 Byte[] hash = sha.ComputeHash(bytes);
@@ -86,7 +84,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public static String Hash(this Stream stream)
         {
-            using(SHA256 sha = new SHA256Managed())
+            using (SHA256 sha = new SHA256Managed())
             {
                 Int64 loc = stream.Position;
                 Byte[] hash = sha.ComputeHash(stream);

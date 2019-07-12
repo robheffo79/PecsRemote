@@ -34,7 +34,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private void ProcessDevice(IReceiver device)
         {
-            lock(seenReceivers)
+            lock (seenReceivers)
             {
                 seenReceivers[device.Id] = device;
             }
@@ -44,7 +44,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             IEnumerable<IReceiver> receivers;
 
-            lock(seenReceivers)
+            lock (seenReceivers)
             {
                 receivers = seenReceivers.Values.ToArray();
             }
@@ -104,7 +104,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public async Task StopMedia()
         {
-            if(sender != null && mediaChannel != null)
+            if (sender != null && mediaChannel != null)
             {
                 await mediaChannel.StopAsync();
             }

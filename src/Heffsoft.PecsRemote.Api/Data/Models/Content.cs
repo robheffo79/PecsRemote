@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Heffsoft.PecsRemote.Api.Models
+namespace Heffsoft.PecsRemote.Api.Data.Models
 {
+    [Table("Content")]
     public class Content
     {
         public Guid Id { get; set; }

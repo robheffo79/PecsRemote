@@ -1,9 +1,8 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
-using Heffsoft.PecsRemote.Api.Models;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Services
 {
@@ -68,7 +67,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             IEnumerable<Notification> notifications = notificationRepo.GetAll().OrderByDescending(n => n.Timestamp).ToArray();
 
-            if(notifications.Count() > MAX_NOTIFICATIONS)
+            if (notifications.Count() > MAX_NOTIFICATIONS)
             {
                 notifications.Skip(MAX_NOTIFICATIONS).ForEach(n => notificationRepo.Delete(n));
                 notifications = notifications.Take(MAX_NOTIFICATIONS);
@@ -105,7 +104,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                 throw new ArgumentOutOfRangeException(nameof(id));
 
             Notification notification = notificationRepo.Get(id);
-            if(notification != null)
+            if (notification != null)
             {
                 notification.Read = true;
                 notificationRepo.Update(notification);

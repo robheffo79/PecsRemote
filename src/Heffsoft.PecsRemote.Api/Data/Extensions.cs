@@ -3,11 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Data
 {
@@ -101,9 +99,9 @@ namespace Heffsoft.PecsRemote.Api.Data
 
             Char lastChar = ' ';
             Char? currentQuote = null;
-            foreach(Char c in sql)
+            foreach (Char c in sql)
             {
-                if(quotes.Contains(c))
+                if (quotes.Contains(c))
                 {
                     if (currentQuote == null)
                     {
@@ -113,7 +111,7 @@ namespace Heffsoft.PecsRemote.Api.Data
                         }
                         query.Append(c);
                     }
-                    else if(currentQuote.Value == c)
+                    else if (currentQuote.Value == c)
                     {
                         if (lastChar != '\\')
                         {
@@ -123,7 +121,7 @@ namespace Heffsoft.PecsRemote.Api.Data
                         query.Append(c);
                     }
                 }
-                else if(c == ';' && currentQuote == null)
+                else if (c == ';' && currentQuote == null)
                 {
                     query.Append(c);
                     yield return query.ToString().Trim();
@@ -138,7 +136,7 @@ namespace Heffsoft.PecsRemote.Api.Data
             }
 
             String leftover = query.ToString().Trim();
-            if(String.IsNullOrWhiteSpace(leftover) == false)
+            if (String.IsNullOrWhiteSpace(leftover) == false)
             {
                 yield return leftover;
             }
