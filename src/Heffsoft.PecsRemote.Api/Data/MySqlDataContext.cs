@@ -52,7 +52,16 @@ namespace Heffsoft.PecsRemote.Api.Data
                         String content = reader.ReadToEnd();
                         foreach (String query in content.SplitSql())
                         {
-                            Connection.ExecuteScalar(query);
+                            try
+                            {
+                                Connection.ExecuteScalar(query);
+                            }
+                            catch(Exception ex)
+                            {
+                                Exception err = new Exception("SQL Error", ex);
+                                err.Data["Query"] = query;
+                                throw err;
+                            }
                         }
                     }
                 }

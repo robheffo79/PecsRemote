@@ -1,6 +1,8 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Controllers
@@ -29,6 +31,27 @@ namespace Heffsoft.PecsRemote.Api.Controllers
         {
             Int32 updateCount = await hostService.GetUpdatesAvailable();
             return Ok(updateCount);
+        }
+
+        [HttpGet, Route("temperature")]
+        public async Task<IActionResult> GetSystemTemperature()
+        {
+            Double temperature = await hostService.GetSystemTemperature();
+            return Ok(temperature);
+        }
+
+        [HttpGet, Route("signalStrength")]
+        public async Task<IActionResult> GetWiFiStrength()
+        {
+            Double? signalStrength = await hostService.GetWiFiStrength();
+            return Ok(new { ssid = "SSID Name", signalStrength });
+        }
+
+        [HttpGet, Route("languages")]
+        public async Task<IActionResult> GetLanguages()
+        {
+            IEnumerable<Language> languages = await hostService.GetLanguages();
+            return Ok(languages);
         }
 
         [HttpPost, Route("update")]

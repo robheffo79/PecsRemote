@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>Heffsoft.PecsRemote.AdminSite</RootNamespace>
     <ProjectGuid>{7A23D203-DDD7-49C2-83F7-2C60FC8CA206}</ProjectGuid>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -15,39 +16,101 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <OutputPath>publish\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
-    <Content Include="components\footer.html" />
-    <Content Include="components\header.html" />
-    <Content Include="components\home\main.html" />
-    <Content Include="components\login.html" />
-    <Content Include="components\main.html" />
-    <Content Include="components\media\main.html" />
-    <Content Include="components\modals.html" />
-    <Content Include="components\setup\main.html" />
-    <Content Include="components\notifications\main.html" />
-    <Content Include="css\bootstrap-4.3.1.min.css" />
-    <Content Include="css\fontawesome-5.9.0.min.css" />
-    <Content Include="css\global.css" />
-    <Content Include="favicon.png" />
-    <Content Include="images\bgtile-256.png" />
-    <Content Include="images\icon.png" />
-    <Content Include="images\logo.png" />
-    <Content Include="images\thumb-missing.png" />
-    <Content Include="index.html" />
-    <Content Include="scripts\adminapp.js" />
-    <Content Include="scripts\bootstrap-4.3.1.min.js" />
-    <Content Include="scripts\fontawesome-5.9.0.min.js" />
-    <Content Include="scripts\handlebars-4.1.2.min.js" />
-    <Content Include="scripts\jquery-3.4.1.min.js" />
-    <Content Include="scripts\popper.min.js" />
-    <Content Include="scripts\tooltip.min.js" />
-    <Content Include="webfonts\fa-brands-400.svg" />
-    <Content Include="webfonts\fa-regular-400.svg" />
-    <Content Include="webfonts\fa-solid-900.svg" />
+    <Content Include="components\footer.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\header.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\home\main.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\login.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\main.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\media\main.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\modals.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\setup\main.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="components\notifications\main.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="css\bootstrap-4.3.1.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="css\fontawesome-5.9.0.min.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="css\global.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="favicon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\bgtile-256.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\logo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="images\thumb-missing.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\adminapp.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\bootstrap-4.3.1.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\fontawesome-5.9.0.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\gauge-2.1.5.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\handlebars-4.1.2.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\jquery-3.4.1.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\jquery.timer.js" />
+    <Content Include="scripts\popper.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\tooltip.min.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="webfonts\fa-brands-400.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="webfonts\fa-regular-400.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="webfonts\fa-solid-900.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
@@ -57,17 +120,43 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="webfonts\fa-brands-400.eot" />
-    <None Include="webfonts\fa-brands-400.ttf" />
-    <None Include="webfonts\fa-brands-400.woff" />
-    <None Include="webfonts\fa-brands-400.woff2" />
-    <None Include="webfonts\fa-regular-400.eot" />
-    <None Include="webfonts\fa-regular-400.ttf" />
-    <None Include="webfonts\fa-regular-400.woff" />
-    <None Include="webfonts\fa-regular-400.woff2" />
-    <None Include="webfonts\fa-solid-900.eot" />
-    <None Include="webfonts\fa-solid-900.ttf" />
-    <None Include="webfonts\fa-solid-900.woff" />
-    <None Include="webfonts\fa-solid-900.woff2" />
+    <None Include="language\es.json" />
+    <None Include="language\en.json" />
+    <None Include="webfonts\fa-brands-400.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-brands-400.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-brands-400.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-brands-400.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-regular-400.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-regular-400.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-regular-400.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-regular-400.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-solid-900.eot">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-solid-900.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-solid-900.woff">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="webfonts\fa-solid-900.woff2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

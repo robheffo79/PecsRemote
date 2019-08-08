@@ -16,6 +16,8 @@
         }
     },
 
+    language: null,
+
     init() {
         adminApp.pushLoader();
 
@@ -46,8 +48,12 @@
 
     login() {
         adminApp.pushLoader();
-        $.ajax({ url: 'components/login.html', crossDomain: true }).done(function (template) {
+        $.when(
+            $.ajax({ url: 'components/login.html', crossDomain: true }),
+            $.ajax({ url: 'api/system/languages', crossDomain: true })
+        ).done(function (template, languages) {
             loginOldContent = $('.main-container').children().detach();
+            // Find current default language and load it.
             $('.main-container').empty().append(template);
             $('#sign-in').on('click', function () {
                 $('.login-form div.alert-danger').addClass('invisible');
@@ -98,6 +104,31 @@
         });
     },
 
+    refreshTimer: $.timer(function () {
+        $.when(
+            $.ajax({ url: 'api/system/temperature', crossDomain: true }),
+            $.ajax({ url: 'api/system/signalStrength', crossDomain: true })
+        ).done(function (temperature, signalStrength) {
+            $('#txtTemperature').html(temperature[0].toFixed(1) + '&deg;C');
+            
+            if (signalStrength[0] == null) {
+                $('#btnWiFi').title('Not Connected');
+                $('#icoWiFiStrength').removeClass('fa-wifi-1 fa-wifi-2').addClass('fa-wifi');
+                $('#icoWiFiSlash').addClass("hidden");
+            } else {
+                $('#btnWiFi').title(signalStrength[0].ssid);
+                $('#icoWiFiStrength').removeClass('fa-wifi-1 fa-wifi-2 fa-wifi').addClass(adminApp.mapSignalStrength(signalStrength[0].signalStrength));
+                $('#icoWiFiSlash').removeClass("hidden");
+            }
+        });
+    }, 10000, false),
+
+    mapSignalStrength: function (strength) {
+        if (strength <= 0.33) { return 'fa-wifi-1'; }
+        if (strength >= 0.66) { return 'fa-wifi'; }
+        return 'fa-wifi-2';
+    },
+
     main() {
         adminApp.pushLoader();
         $('.main-container').empty()
@@ -108,7 +139,7 @@
             $.ajax({ url: 'components/main.html', crossDomain: true }),
             $.ajax({ url: 'components/footer.html', crossDomain: true }),
             $.ajax({ url: 'components/modals.html', crossDomain: true }),
-            $.ajax({ url: 'api/system/updates', crossDomain: true}),
+            $.ajax({ url: 'api/system/updates', crossDomain: true })
         ).done(function (header, main, footer, modals, updates) {
             $('.main-container').append(header[0]).append(main[0]).append(footer[0]);
             $('.modal-container').append(modals[0]);
@@ -126,6 +157,9 @@
                 $('#txtUpdateCount').html = updates[0];
                 $('#btnUpdates').removeAttr('hidden');
             }
+
+            adminApp.refreshTimer.once();
+            adminApp.refreshTimer.play();
 
             adminApp.home();
         });
@@ -194,7 +228,15 @@
     },
 
     setup() {
-        adminApp.setMainPanel('btnSetup', 'components/setup/main.html');
+        adminApp.setMainPanel('btnSetup', 'components/setup/main.html', function () {
+            $.ajax({ url: 'api/settings/wifi', crossDomain: true }).done(function(result) {
+                var lstSsid = $('#lstSsid');
+
+                result.forEach(function (ssid) {
+                    lstSsid.append('<option value="' + ssid + '"');
+                })
+            })
+        });
     },
 
     history() {
@@ -258,6 +300,8 @@
     },
 
     setMainPanel(buttonId, url, then) {
+        adminApp.pushLoader();
+
         $.ajax({ url: url, crossDomain: true }).done(function (html) {
             $('#pnlMain').empty().append(html);
 
@@ -272,6 +316,8 @@
             if (then !== undefined) {
                 then();
             }
+
+            adminApp.popLoader();
         });
     }
 };

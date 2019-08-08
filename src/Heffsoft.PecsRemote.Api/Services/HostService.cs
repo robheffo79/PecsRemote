@@ -1,5 +1,7 @@
-﻿using Heffsoft.PecsRemote.Api.Interfaces;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Interfaces;
 using Heffsoft.PecsRemote.Api.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,13 +23,14 @@ namespace Heffsoft.PecsRemote.Api.Services
     {
         private const String CHECKUPDATES_CMD = "/usr/lib/update-notifier/apt-check";
         private const String REBOOT_CMD = "reboot";
-        private const String WIFI_SCAN_CMD = "iwlist wlan0 scan";
-        private const String INTERFACES_FILE = "/etc/network/interfaces";
+        private const String WIFI_SCAN_CMD = "sudo iwlist wlan0 scan";
+        private const String INTERFACES_FILE = "/etc/network/interfaces.d/wlan0";
         private const String HOSTNAME_FILE = "/etc/hostname";
         private const String CPUINFO_FILE = "/proc/cpuinfo";
         private const String MAC_FILE = "/sys/class/net/wlan0/address";
         private const String HOSTS_FILE = "/etc/hosts";
         private const String DEV_FOLDER = "/dev";
+        private const String LANG_FOLDER = "/home/pecsremote/adminapp/language";
         private const String SYSGRAPHICS_FOLDER = "/sys/class/graphics";
         private const String VIRTUAL_SIZE_NODE = "virtual_size";
         private const String BPP_NODE = "bits_per_pixel";
@@ -37,6 +40,8 @@ namespace Heffsoft.PecsRemote.Api.Services
         private const String BLACKLIST6_CMD = "/sbin/ip6tables -A INPUT -s {ip} -j DROP";
         private const String UNBLACKLIST_CMD = "/sbin/iptables -D INPUT -s {ip} -j DROP";
         private const String UNBLACKLIST6_CMD = "/sbin/ip6tables -D INPUT -s {ip} -j DROP";
+        private const String THERMAL_CMD = "/usr/bin/vcgencmd measure_temp";
+        private const String STRENGTH_CMD = "/sbin/iwconfig wlan0";
 
         public String Hostname => File.ReadAllText(HOSTNAME_FILE);
 
@@ -270,9 +275,6 @@ namespace Heffsoft.PecsRemote.Api.Services
             String ssid = $"{Hostname}_{suffix}";
 
             StringBuilder sb = new StringBuilder();
-            sb.Append($"# interfaces(5) file used by ifup(8) and ifdown(8)\n\n# Please note that this file is written to be used with dhcpcd\n");
-            sb.Append($"# For static IP, consult /etc/dhcpcd.conf and 'man dhcpcd.conf'\n\n# Include files from /etc/network/interfaces.d:\n");
-            sb.Append($"source-directory /etc/network/interfaces.d\n\nauto lo\niface lo inet loopback\n\niface eth0 inet dhcp\n\n");
             sb.Append($"auto wlan0\niface wlan0 inet static\n  address 192.168.1.254\n  netmask 255.255.255.0\n  wireless-channel 6\n");
             sb.Append($"  wireless-essid {ssid}\nwireless-mode ad-hoc\n");
             File.WriteAllText(INTERFACES_FILE, sb.ToString());
@@ -419,6 +421,66 @@ namespace Heffsoft.PecsRemote.Api.Services
                 return Task.CompletedTask;
 
             return RunBashAsync(cmd, false);
+        }
+
+        public async Task<Double> GetSystemTemperature()
+        {
+            String output = await RunBashAsync(THERMAL_CMD, true);
+
+            Regex regex = new Regex(@"(?<temp>[0-9]*\.[0-9]*)");
+            Match match = regex.Match(output);
+            if(match.Success)
+            {
+                return Double.Parse(match.Groups["temp"].Value);
+            }
+
+            return -1.0D;
+        }
+
+        public async Task<Double?> GetWiFiStrength()
+        {
+            Double? strength = null;
+
+            String[] output = (await RunBashAsync(STRENGTH_CMD, true)).Split(Environment.NewLine);
+            Regex regex = new Regex(@"Link Quality=(?<fig>[0-9]*)/(?<div>[0-9]*)");
+            foreach (String line in output)
+            {
+                Match match = regex.Match(line);
+                if(match.Success)
+                {
+                    if(Double.TryParse(match.Groups["fig"].Value, out Double figure))
+                    {
+                        if(Double.TryParse(match.Groups["div"].Value, out Double divisor))
+                        {
+                            strength = (1.0D / divisor) * figure;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return strength;
+        }
+
+        public async Task<IEnumerable<Language>> GetLanguages()
+        {
+            List<Language> languages = new List<Language>();
+
+            foreach(String jsonFile in Directory.EnumerateFiles(LANG_FOLDER, "*.json"))
+            {
+                try
+                {
+                    String json = await File.ReadAllTextAsync(jsonFile);
+                    Language language = JsonConvert.DeserializeObject<Language>(json);
+                    language.Default = language.ISO == "en";
+                    languages.Add(language);
+                }
+                catch
+                {
+                }
+            }
+
+            return languages.OrderBy(l => l.ISO);
         }
     }
 }

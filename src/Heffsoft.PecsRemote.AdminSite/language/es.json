@@ -1,0 +1,15 @@
+﻿[
+  {
+    "name": "Español",
+    "iso": "es",
+    "components": [
+      {
+        "path": "header.html",
+        "data": {
+          "NoConnection": "Sin Conexión",
+          "DegC": "&deg;C"
+        }
+      }
+    ]
+  }
+]

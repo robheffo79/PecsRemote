@@ -3,6 +3,8 @@ using Heffsoft.PecsRemote.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Heffsoft.PecsRemote.Api.Controllers
@@ -34,6 +36,18 @@ namespace Heffsoft.PecsRemote.Api.Controllers
             };
 
             return Ok(settings);
+        }
+
+        [HttpGet, Route("wifi")]
+        public async Task<IActionResult> ScanWifi()
+        {
+            IEnumerable<String> wifi = await hostService.ScanForWiFi();
+            if (wifi != null)
+            {
+                return Ok(wifi.Distinct().OrderBy(w => w));
+            }
+
+            return NotFound();
         }
     }
 }

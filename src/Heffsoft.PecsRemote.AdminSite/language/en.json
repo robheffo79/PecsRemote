@@ -1,0 +1,12 @@
+﻿{
+  "name": "English",
+  "iso": "en",
+  "components": [
+    {
+      "path": "header.html",
+      "data": {
+        "NoConnection": "No Connection"
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
-﻿using Heffsoft.PecsRemote.Api.Models;
+﻿using Heffsoft.PecsRemote.Api.Data.Models;
+using Heffsoft.PecsRemote.Api.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,8 +19,13 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
 
         Task<Int32> GetUpdatesAvailable();
 
+        Task<Double> GetSystemTemperature();
+        Task<Double?> GetWiFiStrength();
+
         Task<HostSettings> GetHostSettings();
         Task<NetworkSettings> GetNetworkSettings();
+
+        Task<IEnumerable<Language>> GetLanguages();
 
         Task<IEnumerable<String>> ScanForWiFi();
 

@@ -11,6 +11,10 @@ footer {
     width: 100%
 }
 
+.hidden {
+    display: none;
+}
+
 .main {
     padding-top: 58px;
 }
