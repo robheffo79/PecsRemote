@@ -18,7 +18,10 @@ namespace Heffsoft.PecsRemote.Api.Services
     {
         public static IServiceCollection AddApiServices(this IServiceCollection services)
         {
-            services.AddSingleton<ICastService, CastService>();
+            services.AddSingleton<ICastService, CastService>()
+                    .AddSingleton<IIdleService, IdleService>()
+                    .AddSingleton<IThermalService, ThermalService>()
+                    .AddSingleton<IDisplayService, DisplayService>();
 
             return services.AddTransient<IRandomService, RandomService>()
                            .AddTransient<IEventLogService, EventLogService>()
@@ -27,6 +30,11 @@ namespace Heffsoft.PecsRemote.Api.Services
                            .AddTransient<IHostService, HostService>()
                            .AddTransient<IContentService, ContentService>()
                            .AddTransient<IMediaService, MediaService>();
+        }
+
+        private static int DisplayService()
+        {
+            throw new NotImplementedException();
         }
 
         public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)

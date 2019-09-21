@@ -40,7 +40,6 @@ namespace Heffsoft.PecsRemote.Api.Services
         private const String BLACKLIST6_CMD = "/sbin/ip6tables -A INPUT -s {ip} -j DROP";
         private const String UNBLACKLIST_CMD = "/sbin/iptables -D INPUT -s {ip} -j DROP";
         private const String UNBLACKLIST6_CMD = "/sbin/ip6tables -D INPUT -s {ip} -j DROP";
-        private const String THERMAL_CMD = "/usr/bin/vcgencmd measure_temp";
         private const String STRENGTH_CMD = "/sbin/iwconfig wlan0";
 
         public String Hostname => File.ReadAllText(HOSTNAME_FILE);
@@ -421,20 +420,6 @@ namespace Heffsoft.PecsRemote.Api.Services
                 return Task.CompletedTask;
 
             return RunBashAsync(cmd, false);
-        }
-
-        public async Task<Double> GetSystemTemperature()
-        {
-            String output = await RunBashAsync(THERMAL_CMD, true);
-
-            Regex regex = new Regex(@"(?<temp>[0-9]*\.[0-9]*)");
-            Match match = regex.Match(output);
-            if(match.Success)
-            {
-                return Double.Parse(match.Groups["temp"].Value);
-            }
-
-            return -1.0D;
         }
 
         public async Task<Double?> GetWiFiStrength()

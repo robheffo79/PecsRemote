@@ -87,7 +87,52 @@ CREATE TABLE `Content` (
 --
 INSERT INTO `Settings` (`Key`, `Value`)
 VALUES ('database:version', '0.0.1'),
-       ('database:lastmodified', NOW());
+       ('database:lastmodified', NOW()),
+	   ('thermal:power:min', '0.2'),
+	   ('thermal:power:start', '1.0'),
+	   ('thermal:control:pin', '13'),
+	   ('thermal:control:frequency', '25'),
+	   ('thermal:control:updatetime', '10000'),
+	   ('thermal:control:sensor', '/sys/class/thermal/thermal_zone0/temp'),
+	   ('thermal:control:curves:0:temp', '0.0'),
+	   ('thermal:control:curves:0:power', '0.2'),
+	   ('thermal:control:curves:1:temp', '20.0'),
+	   ('thermal:control:curves:1:power', '0.2'),
+	   ('thermal:control:curves:2:temp', '70.0'),
+	   ('thermal:control:curves:2:power', '1.0'),
+	   ('thermal:control:curves:3:temp', '100.0'),
+	   ('thermal:control:curves:3:power', '1.0'),
+	   ('display:backlight:idle', '600000'),
+	   ('display:backlight:max', '1.0'),
+	   ('display:backlight:min', '0.0'),
+	   ('display:control:led:pin', '21'),
+	   ('display:control:reset:pin', '20'),
+	   ('display:control:reset:time', '120'),
+	   ('display:control:dc:pin', '16'),
+	   ('display:control:select:pin:0', '4'),
+	   ('display:control:select:pin:1', '5'),
+	   ('display:control:select:pin:2', '6'),
+	   ('display:control:spi:bus', '0'),
+	   ('display:control:spi:cs', '0'),
+	   ('display:control:spi:frequency', '20000000'),
+	   ('display:0:enabled', 'true'),
+	   ('display:0:channel', '1'),
+	   ('display:1:enabled', 'true'),
+	   ('display:1:channel', '2'),
+	   ('display:2:enabled', 'true'),
+	   ('display:2:channel', '3'),
+	   ('display:3:enabled', 'true'),
+	   ('display:3:channel', '4'),
+	   ('display:4:enabled', 'true'),
+	   ('display:4:channel', '5'),
+	   ('display:5:enabled', 'true'),
+	   ('display:5:channel', '6'),
+	   ('display:6:enabled', 'false'),
+	   ('display:6:channel', '0'),
+	   ('display:7:enabled', 'false'),
+	   ('display:7:channel', '0')
+	   ;
+
 
 INSERT INTO `Users` (`Username`, `HashedPassword`, `Salt`)
 VALUES ('Admin', 'bf8d188e28d76e55e642402b27494bd0a50cc581c0b2bcebbe3b4e0226f894e7', 'JQX685l7dWpu4tCn3TcnVDRHXB5AADLzvTZJeiru1uznSnB95Q99KttIeBrRBLHW');

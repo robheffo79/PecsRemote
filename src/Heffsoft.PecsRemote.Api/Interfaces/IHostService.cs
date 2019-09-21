@@ -19,7 +19,6 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
 
         Task<Int32> GetUpdatesAvailable();
 
-        Task<Double> GetSystemTemperature();
         Task<Double?> GetWiFiStrength();
 
         Task<HostSettings> GetHostSettings();

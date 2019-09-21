@@ -7,16 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Heffsoft.PecsRemote.Api", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heffsoft.PecsRemote.AdminSite", "Heffsoft.PecsRemote.AdminSite\Heffsoft.PecsRemote.AdminSite.csproj", "{7A23D203-DDD7-49C2-83F7-2C60FC8CA206}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Hardware", "Hardware", "{33F5050A-6BF6-48F9-9ADF-F11E812741EF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Software", "Software", "{739A6DAF-0A8B-4626-9520-65F6A7ED6594}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DisplayHat", "DisplayHat", "{FEDC2A7D-706F-4FF8-86E6-36A53E013AFA}"
-	ProjectSection(SolutionItems) = preProject
-		DisplayHat\DisplayHad.kicad_pcb = DisplayHat\DisplayHad.kicad_pcb
-		DisplayHat\DisplayHad.pro = DisplayHat\DisplayHad.pro
-		DisplayHat\DisplayHad.sch = DisplayHat\DisplayHad.sch
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,7 +39,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{E479C7C4-183E-48E1-B5F2-209C6A10DF1F} = {739A6DAF-0A8B-4626-9520-65F6A7ED6594}
 		{7A23D203-DDD7-49C2-83F7-2C60FC8CA206} = {739A6DAF-0A8B-4626-9520-65F6A7ED6594}
-		{FEDC2A7D-706F-4FF8-86E6-36A53E013AFA} = {33F5050A-6BF6-48F9-9ADF-F11E812741EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8E73EC71-F413-4C83-AEC3-563B49FCD6E5}

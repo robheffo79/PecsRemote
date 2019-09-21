@@ -13,11 +13,15 @@ namespace Heffsoft.PecsRemote.Api.Controllers
     {
         private readonly IEventLogService eventLogService;
         private readonly IHostService hostService;
+        private readonly IThermalService thermalService;
 
-        public SystemController(IEventLogService eventLogService, IHostService hostService)
+        public SystemController(IEventLogService eventLogService, IHostService hostService, IThermalService thermalService)
         {
             this.eventLogService = eventLogService;
             this.hostService = hostService;
+            this.thermalService = thermalService;
+
+            thermalService.StartControl();
         }
 
         [HttpGet, Route("status")]
@@ -36,7 +40,9 @@ namespace Heffsoft.PecsRemote.Api.Controllers
         [HttpGet, Route("temperature")]
         public async Task<IActionResult> GetSystemTemperature()
         {
-            Double temperature = await hostService.GetSystemTemperature();
+            Double temperature = 0.00D;
+            await Task.Run(() => { temperature = thermalService.Temperature; });
+
             return Ok(temperature);
         }
 
