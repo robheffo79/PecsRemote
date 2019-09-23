@@ -130,7 +130,34 @@ VALUES ('database:version', '0.0.1'),
 	   ('display:6:enabled', 'false'),
 	   ('display:6:channel', '0'),
 	   ('display:7:enabled', 'false'),
-	   ('display:7:channel', '0')
+	   ('display:7:channel', '0'),
+	   ('content:thumbnails:path', '/var/pecsremote/thumbs/'),
+	   ('content:thumbnails:format', 'jpg'),
+	   ('content:thumbnails:quality', '0.8'),
+	   ('content:thumbnails:width', '1280'),
+	   ('content:thumbnails:height', '720'),
+	   ('content:media:path', '/var/pecsremote/media/'),
+	   ('host:files:hostname', '/etc/hostname'),
+	   ('host:files:hosts', '/etc/hosts'),
+	   ('host:files:wlan', '/etc/network/interfaces.d/wlan0'),
+	   ('host:files:wlanmac', '/etc/network/interfaces.d/wlan0'),
+	   ('host:files:cpuinfo', '/proc/cpuinfo'),
+	   ('host:files:uptime', '/proc/uptime'),
+	   ('host:folders:dev', '/dev/'),
+	   ('host:folders:language', '/home/pecsremote/adminapp/language'),
+	   ('host:commands:checkupdates', '/usr/lib/update-notifier/apt-check'),
+	   ('host:commands:reboot', 'reboot'),
+	   ('host:commands:scanwifi', 'sudo iwlist wlan0 scan'),
+	   ('host:commands:blacklist', '/sbin/iptables -A INPUT -s {ip} -j DROP'),
+	   ('host:commands:blacklist6', '/sbin/ip6tables -A INPUT -s {ip} -j DROP'),
+	   ('host:commands:unblacklist', '/sbin/iptables -D INPUT -s {ip} -j DROP'),
+	   ('host:commands:unblacklist6', '/sbin/ip6tables -D INPUT -s {ip} -j DROP'),
+	   ('host:commands:strength', '/sbin/iwconfig wlan0'),
+	   ('host:commands:update', 'apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y autoremove && fstrim / && reboot'),
+	   ('notifications:max', '1000'),
+	   ('user:security:bantimeout', '1800000'),
+	   ('user:security:passwordattempts', '3'),
+	   ('user:security:passwordattemptwindow', '600000')
 	   ;
 
 
@@ -141,5 +168,4 @@ INSERT INTO `EventLog` (`Timestamp`, `Source`, `Message`)
 VALUES (NOW(), 'System', 'Database Initialised');
 
 SET FOREIGN_KEY_CHECKS = 1;
-
 

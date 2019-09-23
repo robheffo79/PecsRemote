@@ -1,5 +1,6 @@
 ﻿using Heffsoft.PecsRemote.Api.Data.Models;
 using Heffsoft.PecsRemote.Api.Interfaces;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,13 +9,15 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class NotificationService : INotificationService
     {
-        private const Int32 MAX_NOTIFICATIONS = 1024;
+        private readonly Int32 notificationsMax;
 
         private readonly IDataContext dataContext;
         private readonly IDataRepository<Notification> notificationRepo;
 
-        public NotificationService(IDataContext dataContext)
+        public NotificationService(IConfiguration configuration, IDataContext dataContext)
         {
+            notificationsMax = configuration.GetValue<Int32>("notifications:max");
+
             this.dataContext = dataContext;
             this.notificationRepo = this.dataContext.GetRepository<Notification>();
         }
@@ -67,10 +70,10 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             IEnumerable<Notification> notifications = notificationRepo.GetAll().OrderByDescending(n => n.Timestamp).ToArray();
 
-            if (notifications.Count() > MAX_NOTIFICATIONS)
+            if (notifications.Count() > notificationsMax)
             {
-                notifications.Skip(MAX_NOTIFICATIONS).ForEach(n => notificationRepo.Delete(n));
-                notifications = notifications.Take(MAX_NOTIFICATIONS);
+                notifications.Skip(notificationsMax).ForEach(n => notificationRepo.Delete(n));
+                notifications = notifications.Take(notificationsMax);
             }
 
             return notifications;

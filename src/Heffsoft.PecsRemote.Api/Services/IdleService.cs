@@ -44,6 +44,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         }
 
         public event EventHandler IdleTimeout;
+        public event EventHandler TimeoutReset;
 
         public void ResetTimeout()
         {
@@ -54,6 +55,13 @@ namespace Heffsoft.PecsRemote.Api.Services
                 timer.Interval = idleTime.TotalMilliseconds;
                 timer.Start();
             }
+
+            OnTimeoutReset();
+        }
+
+        public virtual void OnTimeoutReset()
+        {
+            TimeoutReset?.Invoke(this, EventArgs.Empty);
         }
 
         public virtual void OnIdleTimeout()

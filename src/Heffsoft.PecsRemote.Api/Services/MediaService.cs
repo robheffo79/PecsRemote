@@ -228,7 +228,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             Media media = mediaRepo.Get(id);
             if (media != null)
             {
-                media.Image = contentService.SaveVideo(content, mimeType);
+                media.Image = contentService.SaveMedia(content, mimeType);
                 mediaRepo.Update(media);
             }
         }
@@ -238,7 +238,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             if (media == null)
                 throw new ArgumentNullException(nameof(media));
 
-            media.Image = contentService.SaveVideo(content, mimeType);
+            media.Image = contentService.SaveMedia(content, mimeType);
             mediaRepo.Update(media);
         }
 

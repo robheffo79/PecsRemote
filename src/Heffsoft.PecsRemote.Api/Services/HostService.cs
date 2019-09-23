@@ -1,6 +1,7 @@
 ﻿using Heffsoft.PecsRemote.Api.Data.Models;
 using Heffsoft.PecsRemote.Api.Interfaces;
 using Heffsoft.PecsRemote.Api.Models;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,36 +22,65 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class HostService : IHostService
     {
-        private const String CHECKUPDATES_CMD = "/usr/lib/update-notifier/apt-check";
-        private const String REBOOT_CMD = "reboot";
-        private const String WIFI_SCAN_CMD = "sudo iwlist wlan0 scan";
-        private const String INTERFACES_FILE = "/etc/network/interfaces.d/wlan0";
-        private const String HOSTNAME_FILE = "/etc/hostname";
-        private const String CPUINFO_FILE = "/proc/cpuinfo";
-        private const String MAC_FILE = "/sys/class/net/wlan0/address";
-        private const String HOSTS_FILE = "/etc/hosts";
-        private const String DEV_FOLDER = "/dev";
-        private const String LANG_FOLDER = "/home/pecsremote/adminapp/language";
-        private const String SYSGRAPHICS_FOLDER = "/sys/class/graphics";
-        private const String VIRTUAL_SIZE_NODE = "virtual_size";
-        private const String BPP_NODE = "bits_per_pixel";
-        private const String FRAMEBUFFER_NODES = "fb";
-        private const String UPTIME_FILE = "/proc/uptime";
-        private const String BLACKLIST_CMD = "/sbin/iptables -A INPUT -s {ip} -j DROP";
-        private const String BLACKLIST6_CMD = "/sbin/ip6tables -A INPUT -s {ip} -j DROP";
-        private const String UNBLACKLIST_CMD = "/sbin/iptables -D INPUT -s {ip} -j DROP";
-        private const String UNBLACKLIST6_CMD = "/sbin/ip6tables -D INPUT -s {ip} -j DROP";
-        private const String STRENGTH_CMD = "/sbin/iwconfig wlan0";
+        private readonly String checkupdatesCmd;
+        private readonly String rebootCmd;
+        private readonly String scanwifiCmd;
+        private readonly String blacklistCmd;
+        private readonly String blacklist6Cmd;
+        private readonly String unblacklistCmd;
+        private readonly String unblacklist6Cmd;
+        private readonly String strengthCmd;
+        private readonly String updateCmd;
 
-        public String Hostname => File.ReadAllText(HOSTNAME_FILE);
+        private readonly String wlanFile;
+        private readonly String hostnameFile;
+        private readonly String cpuinfoFile;
+        private readonly String wlanmacFile;
+        private readonly String hostsFile;
+        private readonly String uptimeFile;
 
-        public Int32 ConnectedDisplays => Directory.EnumerateFiles(DEV_FOLDER, FRAMEBUFFER_NODES + "*").Count();
+        private readonly String devFolder;
+        private readonly String languageFolder;
+
+        private readonly IDisplayService displayService;
+
+        public HostService(IConfiguration configuration, IDisplayService displayService)
+        {
+            IConfigurationSection command = configuration.GetSection("host:commands");
+            checkupdatesCmd = command.GetValue<String>("checkupdates");
+            rebootCmd = command.GetValue<String>("reboot");
+            scanwifiCmd = command.GetValue<String>("scanwifi");
+            blacklistCmd = command.GetValue<String>("blacklist");
+            blacklist6Cmd = command.GetValue<String>("blacklist6");
+            unblacklistCmd = command.GetValue<String>("unblacklist");
+            unblacklist6Cmd = command.GetValue<String>("unblacklist6");
+            strengthCmd = command.GetValue<String>("strength");
+            updateCmd = command.GetValue<String>("update");
+
+            IConfigurationSection files = configuration.GetSection("host:files");
+            wlanFile = files.GetValue<String>("wlan");
+            hostnameFile = files.GetValue<String>("hostname");
+            cpuinfoFile = files.GetValue<String>("cpuinfo");
+            wlanmacFile = files.GetValue<String>("wlanmac");
+            hostsFile = files.GetValue<String>("hosts");
+            uptimeFile = files.GetValue<String>("uptime");
+
+            IConfigurationSection folders = configuration.GetSection("host:folders");
+            devFolder = folders.GetValue<String>("dev");
+            languageFolder = folders.GetValue<String>("language");
+
+            this.displayService = displayService;
+        }
+
+        public String Hostname => File.ReadAllText(hostnameFile);
+
+        public Int32 ConnectedDisplays => displayService.Displays.Count(e => e != null);
 
         public String Serial
         {
             get
             {
-                String cpuInfo = File.ReadAllText(CPUINFO_FILE);
+                String cpuInfo = File.ReadAllText(cpuinfoFile);
                 foreach (String line in cpuInfo.Split(new Char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()))
                 {
                     if (line.StartsWith("Serial"))
@@ -63,13 +93,13 @@ namespace Heffsoft.PecsRemote.Api.Services
             }
         }
 
-        public String Mac => File.ReadAllText(MAC_FILE);
+        public String Mac => File.ReadAllText(wlanmacFile);
 
         public Double Uptime
         {
             get
             {
-                String uptime = File.ReadAllText(UPTIME_FILE);
+                String uptime = File.ReadAllText(uptimeFile);
                 String[] parts = uptime.Split(' ');
                 return Double.Parse(parts[0]);
             }
@@ -99,7 +129,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             Regex ssid = new Regex("ESSID:\"(?<ssid>[\\s\\S]{1,32})\"");
 
-            String scanOutput = await RunBashAsync(WIFI_SCAN_CMD);
+            String scanOutput = await RunBashAsync(scanwifiCmd);
 
             List<String> ssidList = new List<String>();
 
@@ -117,16 +147,16 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public async Task SetHostname(String hostname)
         {
-            String oldHostname = File.ReadAllText(HOSTNAME_FILE).Trim();
+            String oldHostname = File.ReadAllText(hostnameFile).Trim();
             String newHostname = hostname.Trim().ToLower();
 
             // Update Hostname
-            await File.WriteAllTextAsync(HOSTNAME_FILE, newHostname);
+            await File.WriteAllTextAsync(hostnameFile, newHostname);
 
             // Update Hosts
-            String hostsFile = File.ReadAllText(HOSTS_FILE);
+            String hostsFile = File.ReadAllText(hostsFile);
             hostsFile = hostsFile.Replace(oldHostname, newHostname);
-            await File.WriteAllTextAsync(HOSTS_FILE, hostsFile);
+            await File.WriteAllTextAsync(hostsFile, hostsFile);
         }
 
         public async Task SetImage(Int32 displayId, Bitmap image)
@@ -149,7 +179,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             FramebufferInfo info = new FramebufferInfo()
             {
                 DisplayId = displayId,
-                DevNode = Path.Combine(DEV_FOLDER, $"{FRAMEBUFFER_NODES}{displayId}"),
+                DevNode = Path.Combine(devFolder, $"{FRAMEBUFFER_NODES}{displayId}"),
                 Width = Int32.Parse(size.Split(',').First()),
                 Height = Int32.Parse(size.Split(',').Last()),
                 PixelFormat = TranslatePixelFormat(Int32.Parse(bpp))
@@ -263,7 +293,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public Task Reboot()
         {
-            return RunBashAsync(REBOOT_CMD, false);
+            return RunBashAsync(rebootCmd, false);
         }
 
         public async Task ConfigureAdHoc()
@@ -276,7 +306,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             StringBuilder sb = new StringBuilder();
             sb.Append($"auto wlan0\niface wlan0 inet static\n  address 192.168.1.254\n  netmask 255.255.255.0\n  wireless-channel 6\n");
             sb.Append($"  wireless-essid {ssid}\nwireless-mode ad-hoc\n");
-            File.WriteAllText(INTERFACES_FILE, sb.ToString());
+            File.WriteAllText(wlanFile, sb.ToString());
         }
 
         public Task<HostSettings> GetHostSettings()
@@ -291,7 +321,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             NetworkSettings settings = new NetworkSettings();
 
-            IEnumerable<String> lines = (await File.ReadAllLinesAsync(INTERFACES_FILE)).Select(l => l.ToLowerInvariant());
+            IEnumerable<String> lines = (await File.ReadAllLinesAsync(wlanFile)).Select(l => l.ToLowerInvariant());
 
             Boolean inSection = false;
             foreach (String line in lines)
@@ -364,7 +394,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public async Task<Int32> GetUpdatesAvailable()
         {
-            String output = await RunBashAsync(CHECKUPDATES_CMD);
+            String output = await RunBashAsync(checkupdatesCmd);
             String[] counts = output.Split(';');
 
             if (Int32.TryParse(counts[0], out Int32 updates))
@@ -377,8 +407,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             return Task.Run(() =>
             {
-                String cmd = "apt-get update && apt-get -y upgrade && apt-get -y dist-upgrade && apt-get -y autoremove && fstrim / && reboot";
-                ForkBash(cmd);
+                ForkBash(updateCmd);
             });
         }
 
@@ -388,12 +417,12 @@ namespace Heffsoft.PecsRemote.Api.Services
 
             if (ip.AddressFamily == AddressFamily.InterNetwork)
             {
-                cmd = BLACKLIST_CMD.Replace("{ip}", ip.ToString());
+                cmd = blacklistCmd.Replace("{ip}", ip.ToString());
             }
 
             if (ip.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                cmd = BLACKLIST6_CMD.Replace("{ip}", ip.ToString());
+                cmd = blacklist6Cmd.Replace("{ip}", ip.ToString());
             }
 
             if (cmd != null)
@@ -408,12 +437,12 @@ namespace Heffsoft.PecsRemote.Api.Services
 
             if (ip.AddressFamily == AddressFamily.InterNetwork)
             {
-                cmd = UNBLACKLIST_CMD.Replace("{ip}", ip.ToString());
+                cmd = unblacklistCmd.Replace("{ip}", ip.ToString());
             }
 
             if (ip.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                cmd = UNBLACKLIST6_CMD.Replace("{ip}", ip.ToString());
+                cmd = unblacklist6Cmd.Replace("{ip}", ip.ToString());
             }
 
             if (cmd != null)
@@ -426,7 +455,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             Double? strength = null;
 
-            String[] output = (await RunBashAsync(STRENGTH_CMD, true)).Split(Environment.NewLine);
+            String[] output = (await RunBashAsync(strengthCmd, true)).Split(Environment.NewLine);
             Regex regex = new Regex(@"Link Quality=(?<fig>[0-9]*)/(?<div>[0-9]*)");
             foreach (String line in output)
             {
@@ -451,7 +480,7 @@ namespace Heffsoft.PecsRemote.Api.Services
         {
             List<Language> languages = new List<Language>();
 
-            foreach(String jsonFile in Directory.EnumerateFiles(LANG_FOLDER, "*.json"))
+            foreach(String jsonFile in Directory.EnumerateFiles(languageFolder, "*.json"))
             {
                 try
                 {

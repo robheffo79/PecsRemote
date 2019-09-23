@@ -17,9 +17,9 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class UserService : IUserService
     {
-        private const Int32 BAN_FOR_TIMEOUT_SECONDS = 1800;
-        private const Int32 FAILED_ATTEMPT_LIMIT = 3;
-        private const Int32 FAILED_ATTEMPT_WINDOW_SECONDS = 600;
+        private readonly Int32 banTimeout;
+        private readonly Int32 passwordAttempts;
+        private readonly Int32 passwordAttemptWindow;
 
         private readonly IDataContext dataContext;
         private readonly IConfiguration configuration;
@@ -34,6 +34,10 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public UserService(IDataContext dataContext, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IRandomService randomService, INotificationService notificationService, IHostService hostService)
         {
+            banTimeout = configuration.GetValue<Int32>("user:security:bantimeout");
+            passwordAttempts = configuration.GetValue<Int32>("user:security:passwordattempts");
+            passwordAttemptWindow = configuration.GetValue<Int32>("user:security:passwordattemptwindow");
+
             this.dataContext = dataContext;
             this.configuration = configuration;
             this.httpContextAccessor = httpContextAccessor;
@@ -129,10 +133,10 @@ namespace Heffsoft.PecsRemote.Api.Services
             lock (failedAttempts)
             {
                 failedAttempts.Add(new FailedAttempt() { ClientIP = clientIP, Timestamp = DateTime.Now });
-                failedAttempts.RemoveAll(a => (DateTime.Now - a.Timestamp).TotalSeconds > FAILED_ATTEMPT_WINDOW_SECONDS);
+                failedAttempts.RemoveAll(a => (DateTime.Now - a.Timestamp).TotalSeconds > passwordAttemptWindow);
 
                 IEnumerable<FailedAttempt> forClient = failedAttempts.Where(a => a.ClientIP == clientIP);
-                if (forClient.Count() > FAILED_ATTEMPT_LIMIT)
+                if (forClient.Count() > passwordAttempts)
                 {
                     Ban(clientIP);
                 }
@@ -141,7 +145,7 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private void Ban(IPAddress clientIP)
         {
-            Int32 banTime = (Int32)(BAN_FOR_TIMEOUT_SECONDS * (randomService.NextDouble() * 0.1D));
+            Int32 banTime = (Int32)(banTimeout * (randomService.NextDouble() * 0.1D));
             String msg = $"Too many failed login attempts from IP Address '{clientIP}'. Address has been blacklisted for {banTime} seconds.";
             notificationService.AddNotification(NotificationType.Security, "Failed Login Attempt Ban", msg, "/images/banhammer.png");
 

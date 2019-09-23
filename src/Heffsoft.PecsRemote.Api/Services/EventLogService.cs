@@ -19,6 +19,8 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public void Log(String source, String message)
         {
+            DateTime timestamp = DateTime.Now;
+
             Task.Run(() =>
             {
                 lock (eventLogRepo)
@@ -26,7 +28,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                     eventLogRepo.Insert<Int32>(new EventLog()
                     {
                         Id = 0,
-                        Timestamp = DateTime.Now,
+                        Timestamp = timestamp,
                         Source = source,
                         Message = message,
                         Data = null
@@ -37,6 +39,8 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public void Log(String source, String message, String data)
         {
+            DateTime timestamp = DateTime.Now;
+
             Task.Run(() =>
             {
                 lock (eventLogRepo)
@@ -44,7 +48,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                     eventLogRepo.Insert<Int32>(new EventLog()
                     {
                         Id = 0,
-                        Timestamp = DateTime.Now,
+                        Timestamp = timestamp,
                         Source = source,
                         Message = message,
                         Data = data
@@ -55,6 +59,8 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public void Log(String source, String message, Object data)
         {
+            DateTime timestamp = DateTime.Now;
+
             Task.Run(() =>
             {
                 String strData = JsonConvert.SerializeObject(data);
@@ -64,7 +70,7 @@ namespace Heffsoft.PecsRemote.Api.Services
                     eventLogRepo.Insert<Int32>(new EventLog()
                     {
                         Id = 0,
-                        Timestamp = DateTime.Now,
+                        Timestamp = timestamp,
                         Source = source,
                         Message = message,
                         Data = strData

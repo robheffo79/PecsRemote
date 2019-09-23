@@ -35,7 +35,7 @@ namespace Heffsoft.PecsRemote.Api.Controllers
             {
                 Id = m.Id,
                 Name = m.Name,
-                Url = contentService.GetVideoUrl(m.File),
+                Url = contentService.GetMediaUrl(m.File),
                 Thumbnail = contentService.GetThumbnailUrl(m.Image),
                 Duration = FormatDuration(m.Duration),
                 ViewCount = m.ViewCount

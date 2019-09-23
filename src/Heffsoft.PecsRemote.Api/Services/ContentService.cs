@@ -12,18 +12,29 @@ namespace Heffsoft.PecsRemote.Api.Services
 {
     public class ContentService : IContentService
     {
-        private const String THUMBNAIL_PATH = "/var/pecsremote/thumbs";
-        private const String VIDEO_PATH = "/var/pecsremote/videos";
+        private readonly String mediaPath;
+
+        private readonly String thumbnailPath;
+        private readonly String thumbnailFormat;
+        private readonly Int32 thumbnailWidth;
+        private readonly Int32 thumbnailHeight;
+        private readonly Double thumbnailQuality;
 
         private readonly IDataContext dataContext;
         private readonly IDataRepository<Content> contentRepo;
-        private readonly IConfiguration configuration;
 
         public ContentService(IDataContext dataContext, IConfiguration configuration)
         {
             this.dataContext = dataContext;
             this.contentRepo = dataContext.GetRepository<Content>();
-            this.configuration = configuration;
+
+            mediaPath = configuration.GetValue<String>("content:media:path");
+
+            thumbnailPath = configuration.GetValue<String>("content:thumbnails:path");
+            thumbnailFormat = configuration.GetValue<String>("content:thumbnails:format");
+            thumbnailWidth = configuration.GetValue<Int32>("content:thumbnails:width");
+            thumbnailHeight = configuration.GetValue<Int32>("content:thumbnails:height");
+            thumbnailQuality = configuration.GetValue<Double>("content:thumbnails:quality");
         }
 
         public void DeleteThumbnail(Guid thumbnailId)
@@ -31,7 +42,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             Delete(thumbnailId);
         }
 
-        public void DeleteVideo(Guid videoId)
+        public void DeleteMedia(Guid videoId)
         {
             Delete(videoId);
         }
@@ -48,12 +59,12 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         public Guid SaveThumbnail(Stream data, String mimeType)
         {
-            return Save(data, mimeType, THUMBNAIL_PATH);
+            return Save(data, mimeType, thumbnailPath);
         }
 
-        public Guid SaveVideo(Stream data, String mimeType)
+        public Guid SaveMedia(Stream data, String mimeType)
         {
-            return Save(data, mimeType, VIDEO_PATH);
+            return Save(data, mimeType, mediaPath);
         }
 
         private Guid Save(Stream data, String mimeType, String path)
@@ -169,36 +180,36 @@ namespace Heffsoft.PecsRemote.Api.Services
             return "";
         }
 
-        public Guid GenerateThumbnail(Guid videoId, Double offset)
+        public Guid GenerateThumbnail(Guid mediaId, Double offset)
         {
-            if (videoId == Guid.Empty)
-                throw new ArgumentOutOfRangeException(nameof(videoId));
+            if (mediaId == Guid.Empty)
+                throw new ArgumentOutOfRangeException(nameof(mediaId));
 
             if (offset < 0.00D || offset > 1.00D)
                 throw new ArgumentOutOfRangeException(nameof(offset));
 
-            Content videoContent = contentRepo.Get(videoId);
-            if (videoContent == null)
-                throw new Exception($"Video '{videoId}' not found.");
+            Content mediaContent = contentRepo.Get(mediaId);
+            if (mediaContent == null)
+                throw new Exception($"Media '{mediaId}' not found.");
 
             FileInfo tempFile = new FileInfo(Path.GetTempFileName());
-            VideoInfo videoInfo = new VideoInfo(videoContent.Filename);
+            VideoInfo videoInfo = new VideoInfo(mediaContent.Filename);
             TimeSpan imageOffetTimeStamp = new TimeSpan((Int64)(videoInfo.Duration.Ticks * offset));
 
             FFMpeg processor = new FFMpeg();
-            Bitmap image = processor.Snapshot(videoInfo, tempFile, new System.Drawing.Size(1280, 720), imageOffetTimeStamp, false);
+            Bitmap image = processor.Snapshot(videoInfo, tempFile, new System.Drawing.Size(thumbnailWidth, thumbnailHeight), imageOffetTimeStamp, false);
 
             using (MemoryStream ms = new MemoryStream())
             {
                 String mime = null;
 
-                switch (configuration.GetValue<String>("content:thumbnail:format", "jpg").ToLower())
+                switch (thumbnailFormat.ToLower())
                 {
                     case "jpg":
                         mime = "image/jpeg";
                         ImageCodecInfo jpegEncoder = GetEncoder(ImageFormat.Jpeg);
                         EncoderParameters parameters = new EncoderParameters(1);
-                        parameters.Param[0] = new EncoderParameter(Encoder.Quality, Math.Clamp((Int64)(100.0D * configuration.GetValue<Double>("content:thumbnail:quality", 0.8D)), 0L, 100L));
+                        parameters.Param[0] = new EncoderParameter(Encoder.Quality, Math.Clamp((Int64)(100.0D * thumbnailQuality), 0L, 100L));
                         image.Save(ms, jpegEncoder, parameters);
                         break;
 
@@ -236,7 +247,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             return "/images/thumb-missing.png";
         }
 
-        public String GetVideoUrl(Guid videoId)
+        public String GetMediaUrl(Guid videoId)
         {
             return "/videos/video.mp4";
         }

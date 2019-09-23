@@ -8,6 +8,7 @@ namespace Heffsoft.PecsRemote.Api.Interfaces
     public interface IIdleService
     {
         event EventHandler IdleTimeout;
+        event EventHandler TimeoutReset;
 
         TimeSpan IdleTime { get; set; }
 

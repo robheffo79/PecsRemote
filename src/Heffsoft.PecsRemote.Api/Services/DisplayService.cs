@@ -26,20 +26,15 @@ namespace Heffsoft.PecsRemote.Api.Services
 
         private readonly ISpiBus spi;
         private readonly IDisplayGpio gpio;
+        private readonly IIdleService idleService;
 
         private Bitmap logoBitmap = null;
         private Bitmap blankBitmap = null;
 
         public Double MaxBrightness { get; set; } = 1.00D;
 
-        public DisplayService(IConfiguration configuration)
+        public DisplayService(IConfiguration configuration, IIdleService idle)
         {
-            Task loadBitmaps = Task.Run(() =>
-            {
-                logoBitmap = LoadBitmap("Heffsoft.PecsRemote.Api.Resources.Logo.png");
-                blankBitmap = LoadBitmap("Heffsoft.PecsRemote.Api.Resources.Blank.png");
-            });
-
             IConfigurationSection control = configuration.GetSection("display:control");
 
             ledPin = control.GetValue<Int32>("led:pin");
@@ -57,61 +52,94 @@ namespace Heffsoft.PecsRemote.Api.Services
 
             spi = new PiSpiBus(spiBus, spiCs, spiFrequency);
             gpio = new DisplayGpio(ledPin, dcPin, resetPin, selectPin0, selectPin1, selectPin2);
+            idleService = idle;
 
-            InitialiseDisplays(configuration, loadBitmaps);
+            Task.WhenAll(InitialiseDisplays(configuration), LoadInitBitmaps())
+                .ContinueWith(delegate { DrawLogoBitmaps(); });
         }
 
-        private void InitialiseDisplays(IConfiguration configuration, Task loadBitmaps)
+        private void StartIdleService()
         {
-            ResetDisplays();
+            idleService.IdleTimeout += IdleService_IdleTimeout;
+            idleService.TimeoutReset += IdleService_TimeoutReset;
+            idleService.ResetTimeout();
+        }
 
-            Displays = new IDisplay[8];
-
-            for (Int32 i = 0; i < 8; i++)
-            {
-                if (configuration.GetValue<Boolean>($"display:{i}:enabled", false) == true)
-                {
-                    Byte channel = configuration.GetValue<Byte>($"display:{i}:channel", (Byte)i);
-                    gpio.ChannelMapping[i] = channel;
-
-                    Displays[i] = new ILI9341(spi, gpio, (Byte)i, Rotation.Landscape, true);
-                    Displays[i].Init();
-                }
-                else
-                {
-                    Displays[i] = null;
-                }
-            }
-
-            loadBitmaps.Wait();
-
-            Boolean logo = true;
-            for (Int32 i = 0; i < 8; i++)
-            {
-                if (Displays[i] != null)
-                {
-                    using (Graphics gfx = Displays[i].Graphics)
-                    {
-                        gfx.DrawImageUnscaled(logo ? logoBitmap : blankBitmap, 0, 0);
-                    }
-
-                    logo = false;
-                }
-            }
-
-            if (logoBitmap != null)
-            {
-                logoBitmap.Dispose();
-                logoBitmap = null;
-            }
-
-            if (blankBitmap != null)
-            {
-                blankBitmap.Dispose();
-                blankBitmap = null;
-            }
-
+        private void IdleService_TimeoutReset(object sender, EventArgs e)
+        {
             gpio.LED = true;
+        }
+
+        private void IdleService_IdleTimeout(Object sender, EventArgs e)
+        {
+            gpio.LED = false;
+        }
+
+        private Task LoadInitBitmaps()
+        {
+            return Task.Run(() =>
+            {
+                logoBitmap = LoadBitmap("Heffsoft.PecsRemote.Api.Resources.Logo.png");
+                blankBitmap = LoadBitmap("Heffsoft.PecsRemote.Api.Resources.Blank.png");
+            });
+        }
+
+        private Task InitialiseDisplays(IConfiguration configuration)
+        {
+            return Task.Run(() =>
+            {
+                ResetDisplays();
+
+                for (Int32 i = 0; i < 8; i++)
+                {
+                    if (configuration.GetValue<Boolean>($"display:{i}:enabled", false) == true)
+                    {
+                        Byte channel = configuration.GetValue<Byte>($"display:{i}:channel", (Byte)i);
+                        gpio.ChannelMapping[i] = channel;
+
+                        Displays[i] = new ILI9341(spi, gpio, (Byte)i, Rotation.Landscape, true);
+                        Displays[i].Init();
+                    }
+                    else
+                    {
+                        Displays[i] = null;
+                    }
+                }
+            });
+        }
+
+        private Task DrawLogoBitmaps()
+        {
+            return Task.Run(() =>
+            {
+                Boolean logo = true;
+                for (Int32 i = 0; i < 8; i++)
+                {
+                    if (Displays[i] != null)
+                    {
+                        using (Graphics gfx = Displays[i].Graphics)
+                        {
+                            gfx.DrawImageUnscaled(logo ? logoBitmap : blankBitmap, 0, 0);
+                        }
+
+                        logo = false;
+                    }
+                }
+
+                if (logoBitmap != null)
+                {
+                    logoBitmap.Dispose();
+                    logoBitmap = null;
+                }
+
+                if (blankBitmap != null)
+                {
+                    blankBitmap.Dispose();
+                    blankBitmap = null;
+                }
+
+                StartIdleService();
+            });
         }
 
         private void ResetDisplays()
@@ -131,7 +159,7 @@ namespace Heffsoft.PecsRemote.Api.Services
             return new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream(resource));
         }
 
-        public IDisplay[] Displays { get; private set; }
+        public IDisplay[] Displays { get; private set; } = new IDisplay[8];
 
         public void Dispose()
         {
